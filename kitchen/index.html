@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Live Kitchen Display - Sapna Juice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase Official Cloud JS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="../sapna-core.js"></script>
+    <script src="../sapna-core.js"></script>
+    <style>
+        /* Universal Lock for Tablet/Monitor Screen */
+        html, body { 
+            height: 100dvh; 
+            width: 100vw; 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background-color: #0f172a; /* Deep Slate (Dark Mode) */
+        }
+        button, select { touch-action: manipulation; }
+        
+        /* Custom thick scrollbar for chefs to drag easily */
+        ::-webkit-scrollbar { height: 12px; width: 12px; }
+        ::-webkit-scrollbar-track { background: #1e293b; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        /* Cooking Glow Animation */
+        .glow-cooking { box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); border-color: #f59e0b; }
+    </style>
+</head>
+<body class="font-sans text-slate-200 select-none antialiased flex flex-col">
+
+    <audio id="audioBell" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav" preload="auto"></audio>
+
+    <header class="bg-slate-900 border-b border-slate-800 h-20 flex items-center justify-between px-6 shadow-xl shrink-0 z-20">
+        
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-amber-500/20 text-amber-500 border border-amber-500/30 rounded-xl flex items-center justify-center font-black text-2xl shadow-lg shrink-0">👨‍🍳</div>
+            <div>
+                <h1 class="text-xl font-black tracking-widest text-white">LIVE KITCHEN <span class="text-amber-400">KDS</span></h1>
+                <p class="text-xs text-slate-400 font-bold tracking-wider">Chef Command Center</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 bg-slate-950 p-1.5 rounded-xl border border-slate-800 shadow-inner">
+            <span class="text-xs font-bold text-slate-400 pl-3 uppercase tracking-wider hidden sm:inline">Active Station:</span>
+            <select id="selKitchen" onchange="switchKitchen()" class="bg-slate-800 text-amber-400 font-black text-sm lg:text-base px-4 py-2 rounded-lg outline-none cursor-pointer border border-slate-700 shadow-sm">
+                <option value="ALL">🔥 MASTER VIEW (All Stations)</option>
+                </select>
+        </div>
+
+        <div class="text-right hidden md:block bg-slate-950 px-4 py-2 rounded-xl border border-slate-800">
+            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Pending Workload</p>
+            <h2 class="text-xl font-black text-emerald-400" id="lblPendingCount">0 Items</h2>
+        </div>
+
+    </header>
+
+    <main class="flex-1 overflow-x-auto overflow-y-hidden p-6 bg-slate-950 flex gap-6 items-start scroll-smooth" id="boardTickets">
+        
+        <div id="stateEmpty" class="absolute inset-0 flex flex-col items-center justify-center text-slate-600 z-0">
+            <span class="text-7xl mb-4 opacity-50">✨</span>
+            <h3 class="text-2xl font-black text-slate-500">Kitchen is Clear!</h3>
+            <p class="text-sm font-bold mt-2 text-slate-600">Waiting for counter or captain to punch tickets...</p>
+        </div>
+
+        </main>
+
+    <script>
+        let ACTIVE_KITCHEN = 'ALL';
+        let lastPendingCount = 0;
+
+        function initKDS() {
+            const db = Sapna.get();
+            const sel = document.getElementById('selKitchen');
+            
+            // 1. Populate Dropdown dynamically from Admin's setup
+            let optionsHTML = `<option value="ALL">🔥 MASTER VIEW (All Stations)</option>`;
+            if (db.kitchens) {
+                db.kitchens.forEach(k => {
+                    optionsHTML += `<option value="${k.id}" ${ACTIVE_KITCHEN === k.id ? 'selected' : ''}>${k.icon || '🍳'} ${k.name}</option>`;
+                });
+            }
+            sel.innerHTML = optionsHTML;
+
+            // Ensure selected value matches state (in case of re-render)
+            sel.value = ACTIVE_KITCHEN;
+            
+            renderBoard();
+        }
+
+        window.switchKitchen = () => {
+            ACTIVE_KITCHEN = document.getElementById('selKitchen').value;
+            renderBoard();
+        };
+
+        function renderBoard() {
+            const db = Sapna.get();
+            const board = document.getElementById('boardTickets');
+            const empty = document.getElementById('stateEmpty');
+            
+            // Clear board (except empty state)
+            board.innerHTML = '';
+            
+            let totalPending = 0;
+            let cardsRendered = 0;
+
+            if (db.activeOrders) {
+                db.activeOrders.forEach(order => {
+                    
+                    // Filter items for this specific tablet's kitchen
+                    const validItems = order.items.filter(item => {
+                        if (item.status === 'READY') return false; // Hide ready items from screen
+                        if (ACTIVE_KITCHEN === 'ALL') return true; 
+                        return item.kitchenId === ACTIVE_KITCHEN;
+                    });
+
+                    if (validItems.length === 0) return; // Skip ticket if no items for this kitchen
+
+                    cardsRendered++;
+                    const isCooking = validItems.some(i => i.status === 'COOKING');
+                    const cardBorder = isCooking ? 'glow-cooking' : 'border-slate-700';
+                    const cardHeaderBg = isCooking ? 'bg-amber-900/40 text-amber-400' : 'bg-slate-800 text-white';
+
+                    let itemsHTML = '';
+                    validItems.forEach(item => {
+                        
+                        let btnHTML = '';
+                        let itemBg = 'bg-slate-800/50 border-slate-700';
+
+                        // 🔴 PENDING 
+                        if (item.status === 'PENDING') {
+                            totalPending++;
+                            btnHTML = `<button onclick="Sapna.updateKitchenItemStatus('${order.orderId}', '${item.uniqueTicketId}', 'COOKING')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 rounded-xl text-[11px] uppercase tracking-wider transition active:scale-95 flex items-center justify-center gap-1.5 shadow-md">👉 ACCEPT ORDER</button>`;
+                        } 
+                        // 🟠 COOKING
+                        else if (item.status === 'COOKING') {
+                            itemBg = 'bg-amber-900/20 border-amber-500/30';
+                            btnHTML = `<button onclick="Sapna.updateKitchenItemStatus('${order.orderId}', '${item.uniqueTicketId}', 'READY')" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl text-[11px] uppercase tracking-wider transition active:scale-95 flex items-center justify-center gap-1.5 shadow-md">✓ MARK READY</button>`;
+                        }
+
+                        itemsHTML += `
+                            <div class="p-3 rounded-2xl border ${itemBg} flex flex-col gap-3 transition-colors">
+                                <div class="flex justify-between items-start gap-2">
+                                    <span class="font-black text-sm text-slate-100 leading-snug">${item.name}</span>
+                                    <span class="text-[9px] font-black uppercase px-2 py-1 rounded tracking-widest ${item.status === 'COOKING' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse' : 'bg-slate-700 text-slate-300'}">${item.status}</span>
+                                </div>
+                                <div>${btnHTML}</div>
+                            </div>
+                        `;
+                    });
+
+                    // Build Ticket Card (Fixed Width for horizontal scroll)
+                    const labelTable = db.tables.find(t => t.id === order.tableId)?.label || order.tableId;
+                    const ticketTypeLabel = order.type === 'PARCEL' ? '🛍️ PARCEL' : '🍽️ DINE-IN';
+
+                    board.innerHTML += `
+                        <div class="w-80 sm:w-96 shrink-0 h-full max-h-full bg-slate-900 border-2 ${cardBorder} rounded-3xl flex flex-col overflow-hidden shadow-2xl relative z-10">
+                            <div class="p-4 ${cardHeaderBg} border-b border-slate-700 flex justify-between items-center shrink-0">
+                                <div>
+                                    <span class="text-[10px] font-black uppercase tracking-widest block opacity-80">${ticketTypeLabel}</span>
+                                    <h2 class="text-xl font-black">${labelTable}</h2>
+                                </div>
+                                <span class="text-xs font-mono font-bold opacity-70 bg-black/20 px-2 py-1 rounded-lg">${order.timestamp}</span>
+                            </div>
+                            <div class="flex-1 overflow-y-auto p-3 space-y-3 bg-slate-900/50">
+                                ${itemsHTML}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('lblPendingCount').innerText = `${totalPending} Items`;
+            
+            // Show/Hide Empty State
+            if (cardsRendered === 0) empty.style.display = 'flex';
+            else empty.style.display = 'none';
+
+            // 🔔 Play Alarm if new items arrived!
+            if (totalPending > lastPendingCount) {
+                const alarm = document.getElementById('audioBell');
+                if(alarm) alarm.play().catch(e => console.log("Autoplay blocked"));
+            }
+            lastPendingCount = totalPending;
+        }
+
+        // Live Realtime Listener
+        window.addEventListener('SAPNA_STATE_UPDATED', () => {
+            initKDS(); // Re-init keeps dropdown in sync if Admin adds a kitchen
+        });
+
+        // App Boot
+        initKDS();
+    </script>
+</body>
+</html>

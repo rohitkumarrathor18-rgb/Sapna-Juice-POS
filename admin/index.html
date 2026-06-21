@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sapna Juice - Master Admin HQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase Official Cloud JS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="../sapna-core.js"></script>
+    <script src="../sapna-core.js"></script>
+    <style>
+        body { background-color: #f1f5f9; color: #0f172a; }
+        button, input, select { touch-action: manipulation; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+    </style>
+</head>
+<body class="font-sans flex flex-col min-h-screen select-none">
+
+    <!-- TOP STICKY HEADER -->
+    <header class="bg-emerald-900 text-white sticky top-0 z-40 shadow-xl border-b border-emerald-800 px-4 sm:px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-white text-emerald-950 rounded-2xl flex items-center justify-center font-black text-2xl shadow-md shrink-0">👑</div>
+            <div>
+                <h1 class="text-xl font-black tracking-wide text-white">SAPNA JUICE <span class="text-amber-300">| Admin HQ</span></h1>
+                <p class="text-xs text-emerald-200 font-medium">Modular Store Controller</p>
+            </div>
+        </div>
+
+        <!-- 4 CLEAN PILL TABS -->
+        <div class="flex gap-1.5 bg-emerald-950 p-1.5 rounded-2xl border border-emerald-800 max-w-full overflow-x-auto shrink-0">
+            <button onclick="switchTab('DASH')" id="btn_DASH" class="px-5 py-2 rounded-xl text-xs font-black uppercase transition bg-white text-emerald-950 shadow whitespace-nowrap">📊 Dashboard</button>
+            <button onclick="switchTab('SETUP')" id="btn_SETUP" class="px-5 py-2 rounded-xl text-xs font-bold uppercase transition text-emerald-200 hover:text-white whitespace-nowrap">🏗️ Store Setup</button>
+            <button onclick="switchTab('MENU')" id="btn_MENU" class="px-5 py-2 rounded-xl text-xs font-bold uppercase transition text-emerald-200 hover:text-white whitespace-nowrap">🍔 Menu</button>
+            <button onclick="switchTab('STAFF')" id="btn_STAFF" class="px-5 py-2 rounded-xl text-xs font-bold uppercase transition text-emerald-200 hover:text-white whitespace-nowrap">👥 Staff</button>
+        </div>
+    </header>
+
+    <!-- MAIN WORKING CONTAINER -->
+    <div class="flex-1 p-4 sm:p-8 max-w-7xl mx-auto w-full">
+
+        <!-- ========================================================= -->
+        <!-- TAB 1: DASHBOARD -->
+        <!-- ========================================================= -->
+        <div id="tab_DASH" class="space-y-6 block">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <span class="text-xs font-bold text-slate-400 uppercase">Live Tables</span>
+                    <h3 class="text-4xl font-black text-slate-800 mt-2" id="boxTables">0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <span class="text-xs font-bold text-slate-400 uppercase">Menu Items</span>
+                    <h3 class="text-4xl font-black text-slate-800 mt-2" id="boxMenu">0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <span class="text-xs font-bold text-slate-400 uppercase">Kitchen Screens</span>
+                    <h3 class="text-4xl font-black text-slate-800 mt-2" id="boxKitchens">0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <span class="text-xs font-bold text-slate-400 uppercase">Active Staff</span>
+                    <h3 class="text-4xl font-black text-slate-800 mt-2" id="boxStaff">0</h3>
+                </div>
+            </div>
+
+           <!-- THE CLEAN & SOBER OWNER CARD -->
+<div class="bg-slate-900 rounded-3xl p-8 text-white shadow-xl border border-slate-800 relative overflow-hidden">
+    <div class="relative z-10 max-w-xl space-y-2">
+        
+        <div class="flex items-center gap-2">
+            <span class="bg-emerald-500 text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider">Owner Dashboard</span>
+            <span class="text-xs text-slate-500 font-mono">• SAPNA JUICE ERP</span>
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            Welcome to Sapna HQ
+        </h2>
+
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+            This is your central control panel. Use <b class="text-emerald-400 font-semibold">'Store Setup'</b> to manage your kitchen stations and seating layout, or update your live catalog and staff payroll instantly across all store devices.
+        </p>
+
+    </div>
+    
+    <!-- Subtle professional building icon in the background -->
+    <span class="absolute -bottom-6 -right-6 text-8xl opacity-10 select-none">🏢</span>
+</div>
+    
+    <!-- THE WEALTH WATERMARK: Giant Indian Rupee Symbol instead of a cocktail glass -->
+    <span class="absolute -bottom-8 -right-4 text-9xl opacity-[0.06] font-black text-amber-400 select-none font-serif">₹</span>
+</div>
+
+        <!-- ========================================================= -->
+        <!-- TAB 2: STORE SETUP (3 Fixed Height Cards) -->
+        <!-- ========================================================= -->
+        <div id="tab_SETUP" class="grid grid-cols-1 lg:grid-cols-3 gap-6 hidden">
+            
+            <!-- 1. KITCHEN CARD -->
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col h-[480px]">
+                <h2 class="text-sm font-black text-amber-600 uppercase tracking-wider mb-4 flex items-center gap-2"><span>🔥</span> 1. Manage Kitchens</h2>
+                <form id="formAddKitchen" class="flex gap-2 mb-4 shrink-0">
+                    <input type="text" id="inpKitName" required placeholder="Station Name (e.g. Shakes Bar)" class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold text-xs outline-none focus:bg-white">
+                    <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-4 py-2 rounded-xl shadow transition text-xs uppercase">Add</button>
+                </form>
+                <div class="flex-1 overflow-y-auto pr-1">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead class="bg-slate-100 text-slate-500 uppercase font-black text-[10px] sticky top-0">
+                            <tr><th class="p-3">Station Name</th><th class="p-3 text-right w-16">Action</th></tr>
+                        </thead>
+                        <tbody id="tbodyKitchens" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 2. TABLES CARD -->
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col h-[480px]">
+                <h2 class="text-sm font-black text-blue-600 uppercase tracking-wider mb-4 flex items-center gap-2"><span>🪑</span> 2. Manage Tables</h2>
+                <form id="formAddTable" class="grid grid-cols-3 gap-1.5 mb-4 shrink-0">
+                    <input type="text" id="inpTblArea" required placeholder="Zone" class="bg-slate-50 border border-slate-300 rounded-xl px-2 py-2 font-bold text-xs outline-none focus:bg-white">
+                    <input type="text" id="inpTblLabel" required placeholder="Table #" class="bg-slate-50 border border-slate-300 rounded-xl px-2 py-2 font-bold text-xs outline-none focus:bg-white">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-black py-2 rounded-xl shadow transition text-[11px] uppercase">Add</button>
+                </form>
+                <div class="flex-1 overflow-y-auto pr-1">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead class="bg-slate-100 text-slate-500 uppercase font-black text-[10px] sticky top-0">
+                            <tr><th class="p-3">Zone</th><th class="p-3">Table Name</th><th class="p-3 text-right w-16">Action</th></tr>
+                        </thead>
+                        <tbody id="tbodyTables" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. CATEGORIES CARD (NEW!) -->
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col h-[480px]">
+                <h2 class="text-sm font-black text-emerald-600 uppercase tracking-wider mb-4 flex items-center gap-2"><span>📁</span> 3. Manage Categories</h2>
+                <form id="formAddCat" class="flex gap-2 mb-4 shrink-0">
+                    <input type="text" id="inpCatName" required placeholder="Category (e.g. South Indian)" class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold text-xs outline-none focus:bg-white">
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-4 py-2 rounded-xl shadow transition text-xs uppercase">Add</button>
+                </form>
+                <div class="flex-1 overflow-y-auto pr-1">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead class="bg-slate-100 text-slate-500 uppercase font-black text-[10px] sticky top-0">
+                            <tr><th class="p-3">Category Name</th><th class="p-3 text-right w-16">Action</th></tr>
+                        </thead>
+                        <tbody id="tbodyCats" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- TAB 3: MENU BUILDER -->
+        <!-- ========================================================= -->
+        <div id="tab_MENU" class="grid grid-cols-1 lg:grid-cols-3 gap-6 hidden">
+            
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm h-fit">
+                <h2 class="text-sm font-black text-emerald-700 uppercase tracking-wider mb-4 flex items-center gap-2"><span>🍔</span> Add Product</h2>
+                <form id="formAddMenu" class="space-y-3.5">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Product Name</label>
+                        <input type="text" id="inpMenuName" required placeholder="e.g. Mango Malai" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-bold text-sm outline-none focus:bg-white">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Category</label>
+                            <!-- YAHAN AB CATEGORIES DATABASE SE DYNAMICALLY AAYENGI -->
+                            <select id="inpMenuCat" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2 py-2.5 font-bold text-xs outline-none focus:bg-white"></select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Price (₹)</label>
+                            <input type="number" id="inpMenuPrice" required min="1" placeholder="80" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-bold text-sm outline-none focus:bg-white">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Route to Kitchen</label>
+                        <select id="inpMenuKit" class="w-full bg-emerald-50 border border-emerald-300 text-emerald-950 font-black rounded-xl px-3 py-2.5 text-xs outline-none"></select>
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-black py-3.5 rounded-xl shadow transition text-xs uppercase tracking-wider mt-2">Save to POS ✓</button>
+                </form>
+            </div>
+
+            <div class="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col h-[550px]">
+                <h2 class="text-sm font-black text-slate-700 uppercase tracking-wider mb-4">Live POS Catalog</h2>
+                <div class="flex-1 overflow-y-auto pr-1">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead class="bg-slate-100 text-slate-500 uppercase font-black text-[10px] sticky top-0">
+                            <tr><th class="p-3">Item</th><th class="p-3">Category</th><th class="p-3">Routing</th><th class="p-3 text-right">Price</th><th class="p-3 text-center w-16">Action</th></tr>
+                        </thead>
+                        <tbody id="tbodyMenu" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- TAB 4: STAFF ERP -->
+        <!-- ========================================================= -->
+        <div id="tab_STAFF" class="grid grid-cols-1 lg:grid-cols-3 gap-6 hidden">
+            
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm h-fit">
+                <h2 class="text-sm font-black text-emerald-800 uppercase tracking-wider mb-4 flex items-center gap-2"><span>🧑‍🍳</span> Register Staff</h2>
+                <form id="formAddStaff" class="space-y-3.5">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Full Name</label>
+                        <input type="text" id="inpStfName" required placeholder="e.g. Hari Om" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-bold text-sm outline-none focus:bg-white">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Role</label>
+                            <select id="inpStfRole" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2 py-2.5 font-bold text-xs outline-none"><option>Chef</option><option>Waiter</option><option>Cashier</option></select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Base (₹)</label>
+                            <input type="number" id="inpStfSalary" required min="1000" placeholder="12000" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-bold text-sm outline-none focus:bg-white">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-black py-3.5 rounded-xl shadow transition text-xs uppercase tracking-wider mt-2">+ Add to Khata</button>
+                </form>
+            </div>
+
+            <div class="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col h-[550px]">
+                <h2 class="text-sm font-black text-slate-700 uppercase tracking-wider mb-4">Salary & Advance Ledger</h2>
+                <div class="flex-1 overflow-y-auto pr-1">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead class="bg-slate-100 text-slate-500 uppercase font-black text-[10px] sticky top-0">
+                            <tr><th class="p-3">Employee</th><th class="p-3 text-center">Haziri</th><th class="p-3 text-right">Base</th><th class="p-3 w-28 text-center">Advance (-)</th><th class="p-3 text-right bg-emerald-50">Net Pay</th><th class="p-3 text-center w-24">Action</th></tr>
+                        </thead>
+                        <tbody id="tbodyStaff" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- STRICT SCOPED JAVASCRIPT LOGIC -->
+    <script>
+        const ALL_TABS = ['DASH', 'SETUP', 'MENU', 'STAFF'];
+
+        // Strict DB Schema patcher (Checks for missing Categories array)
+        function verifySchema() {
+            const db = Sapna.get();
+            let update = false;
+            if(!db.kitchens) { db.kitchens = [{id:'KITCHEN_BAR', name:'Juice Bar', icon:'🍹'}, {id:'KITCHEN_FOOD', name:'Fast Food', icon:'🍔'}]; update = true; }
+            if(!db.staff) { db.staff = [{id:'STF_1', name:'Ramesh (Chef)', role:'Chef', baseSalary:18000, advanceTaken:1500, statusToday:'PRESENT'}]; update = true; }
+            // NAYA PATCH: Piche se Categories inject karo
+            if(!db.categories) { db.categories = ["Fresh Juices", "Milkshakes", "Snacks", "Ice Cream"]; update = true; }
+            if(update) Sapna.save(db);
+        }
+
+        function switchTab(target) {
+            ALL_TABS.forEach(t => {
+                document.getElementById('tab_' + t).classList.add('hidden');
+                document.getElementById('btn_' + t).className = "px-5 py-2 rounded-xl text-xs font-bold uppercase transition text-emerald-200 hover:text-white whitespace-nowrap";
+            });
+            document.getElementById('tab_' + target).classList.remove('hidden');
+            document.getElementById('btn_' + target).className = "px-5 py-2 rounded-xl text-xs font-black uppercase transition bg-white text-emerald-950 shadow whitespace-nowrap";
+            refreshData();
+        }
+
+        function refreshData() {
+            const db = Sapna.get();
+
+            // 1. Dash
+            document.getElementById('boxTables').innerText = db.activeOrders.length;
+            document.getElementById('boxMenu').innerText = db.menu.length;
+            document.getElementById('boxKitchens').innerText = db.kitchens.length;
+            document.getElementById('boxStaff').innerText = db.staff.length;
+
+            // 2. Setup: Kitchens
+            const tk = document.getElementById('tbodyKitchens'); tk.innerHTML = '';
+            db.kitchens.forEach(k => {
+                tk.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-3"><span class="font-black text-[10px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded">${k.id}</span> <span class="ml-2">${k.name}</span></td><td class="p-3 text-right"><button onclick="rmKit('${k.id}')" class="text-red-500 font-bold px-2 py-1 hover:bg-red-50 rounded">Del</button></td></tr>`;
+            });
+
+            // 3. Setup: Tables
+            const tt = document.getElementById('tbodyTables'); tt.innerHTML = '';
+            db.tables.forEach(t => {
+                tt.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-3"><span class="font-black text-[10px] bg-slate-200 text-slate-800 px-2 py-0.5 rounded">${t.area||'Hall'}</span></td><td class="p-3 text-blue-700">${t.label}</td><td class="p-3 text-right"><button onclick="rmTbl('${t.id}')" class="text-red-500 font-bold px-2 py-1 hover:bg-red-50 rounded">Del</button></td></tr>`;
+            });
+
+            // 4. Setup: Categories (NEW!)
+            const tc = document.getElementById('tbodyCats'); tc.innerHTML = '';
+            db.categories.forEach(cat => {
+                tc.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-3 font-bold">${cat}</td><td class="p-3 text-right"><button onclick="rmCat('${cat}')" class="text-red-500 font-bold px-2 py-1 hover:bg-red-50 rounded">Del</button></td></tr>`;
+            });
+
+            // 5. Menu Builder: Populating Category Dropdown
+            document.getElementById('inpMenuCat').innerHTML = db.categories.map(c => `<option value="${c}">${c}</option>`).join('');
+
+            // 6. Menu Builder: Populating Kitchen Dropdown
+            document.getElementById('inpMenuKit').innerHTML = db.kitchens.map(k => `<option value="${k.id}">${k.name}</option>`).join('');
+
+            // 7. Menu: Table
+            const tm = document.getElementById('tbodyMenu'); tm.innerHTML = '';
+            db.menu.forEach(m => {
+                let kit = db.kitchens.find(x => x.id === m.kitchenId)?.name || 'Unknown';
+                tm.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-3">${m.name}</td><td class="p-3 text-slate-400">${m.category}</td><td class="p-3"><span class="bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded text-[10px]">${kit}</span></td><td class="p-3 text-right text-emerald-600">₹${m.price}</td><td class="p-3 text-center"><button onclick="rmMenu('${m.id}')" class="text-red-500 font-bold px-2 py-1 hover:bg-red-50 rounded">Del</button></td></tr>`;
+            });
+
+            // 8. Staff: Table
+            const ts = document.getElementById('tbodyStaff'); ts.innerHTML = '';
+            db.staff.forEach(s => {
+                let adv = Number(s.advanceTaken)||0; let net = s.baseSalary - adv;
+                ts.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-3 font-bold">${s.name} <span class="text-[10px] font-normal text-slate-400 block">${s.role}</span></td><td class="p-3 text-center"><button onclick="togH('${s.id}')" class="px-2 py-0.5 rounded text-[10px] font-black ${s.statusToday==='PRESENT'?'bg-green-600 text-white':'bg-red-500 text-white'}">${s.statusToday==='PRESENT'?'P':'A'}</button></td><td class="p-3 text-right">₹${s.baseSalary}</td><td class="p-3 text-center"><input type="number" value="${adv}" onchange="upAdv('${s.id}', this.value)" class="w-16 bg-amber-50 border rounded px-1 py-0.5 text-center font-bold text-xs"></td><td class="p-3 text-right font-black text-emerald-700 bg-emerald-50/50">₹${net}</td><td class="p-3 text-center whitespace-nowrap"><button onclick="pay('${s.id}','${s.name}',${net})" class="px-2 py-1 bg-slate-900 text-white rounded text-xs font-bold mr-1">Pay</button><button onclick="rmStf('${s.id}')" class="text-slate-400 hover:text-red-500 font-bold px-1">✕</button></td></tr>`;
+            });
+        }
+
+        // Form Handlers
+        document.getElementById('formAddKitchen').onsubmit = (e) => {
+            e.preventDefault(); const db = Sapna.get();
+            db.kitchens.push({ id: 'KIT_' + Math.random().toString(36).substr(2,4).toUpperCase(), name: document.getElementById('inpKitName').value.trim(), icon: '👨‍🍳' });
+            Sapna.save(db); e.target.reset(); refreshData();
+        };
+        document.getElementById('formAddTable').onsubmit = (e) => {
+            e.preventDefault(); const db = Sapna.get();
+            db.tables.push({ id: 'TBL_' + Math.random().toString(36).substr(2,5).toUpperCase(), area: document.getElementById('inpTblArea').value.trim(), label: document.getElementById('inpTblLabel').value.trim(), isParcel: false });
+            Sapna.save(db); e.target.reset(); refreshData();
+        };
+        
+        // NAYA FORM SUBMIT: CATEGORY
+        document.getElementById('formAddCat').onsubmit = (e) => {
+            e.preventDefault(); const db = Sapna.get();
+            const newCat = document.getElementById('inpCatName').value.trim();
+            if(!db.categories.includes(newCat)) {
+                db.categories.push(newCat);
+                Sapna.save(db); e.target.reset(); refreshData();
+            } else { alert("This category name already exists!"); }
+        };
+
+        document.getElementById('formAddMenu').onsubmit = (e) => {
+            e.preventDefault(); const db = Sapna.get();
+            db.menu.push({ id: 'm_' + Math.random().toString(36).substr(2,5), name: document.getElementById('inpMenuName').value.trim(), category: document.getElementById('inpMenuCat').value, price: Number(document.getElementById('inpMenuPrice').value), kitchenId: document.getElementById('inpMenuKit').value });
+            Sapna.save(db); e.target.reset(); refreshData();
+        };
+        document.getElementById('formAddStaff').onsubmit = (e) => {
+            e.preventDefault(); const db = Sapna.get();
+            db.staff.push({ id: 'STF_' + Math.random().toString(36).substr(2,5), name: document.getElementById('inpStfName').value.trim(), role: document.getElementById('inpStfRole').value, baseSalary: Number(document.getElementById('inpStfSalary').value), advanceTaken: 0, statusToday: 'PRESENT' });
+            Sapna.save(db); e.target.reset(); refreshData();
+        };
+
+        // Deletions
+        window.rmKit = (id) => { if(confirm("Delete Station?")) { const db = Sapna.get(); db.kitchens = db.kitchens.filter(x=>x.id!==id); Sapna.save(db); refreshData(); } };
+        window.rmTbl = (id) => { if(confirm("Delete Table?")) { const db = Sapna.get(); db.tables = db.tables.filter(x=>x.id!==id); Sapna.save(db); refreshData(); } };
+        window.rmMenu = (id) => { if(confirm("Delete Item?")) { const db = Sapna.get(); db.menu = db.menu.filter(x=>x.id!==id); Sapna.save(db); refreshData(); } };
+        window.rmStf = (id) => { if(confirm("Delete Staff?")) { const db = Sapna.get(); db.staff = db.staff.filter(x=>x.id!==id); Sapna.save(db); refreshData(); } };
+        
+        // NAYA DELETE: CATEGORY
+        window.rmCat = (catName) => { 
+            if(confirm(`Delete category "${catName}"? Linked menu items will still remain.`)) { 
+                const db = Sapna.get(); db.categories = db.categories.filter(c => c !== catName); 
+                Sapna.save(db); refreshData(); 
+            } 
+        };
+
+        // Ledger updates
+        window.togH = (id) => { const db = Sapna.get(); let s = db.staff.find(x=>x.id===id); s.statusToday = s.statusToday==='PRESENT'?'ABSENT':'PRESENT'; Sapna.save(db); refreshData(); };
+        window.upAdv = (id, val) => { const db = Sapna.get(); db.staff.find(x=>x.id===id).advanceTaken = Number(val)||0; Sapna.save(db); refreshData(); };
+        window.pay = (id, name, amt) => { if(confirm(`Pay ₹${amt} to ${name}?`)) { const db = Sapna.get(); db.staff.find(x=>x.id===id).advanceTaken = 0; Sapna.save(db); refreshData(); } };
+
+        window.addEventListener('SAPNA_STATE_UPDATED', refreshData);
+
+        // Run
+        verifySchema();
+        switchTab('DASH');
+
+
+    </script>
+    
+</body>
+</html>
