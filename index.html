@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sapna Juice ERP - Central Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-[100dvh] flex flex-col justify-center items-center p-4 selection:bg-amber-500 selection:text-black">
+
+    <div class="max-w-xl w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+        
+        <!-- Background Wealth Mark -->
+        <span class="absolute -top-10 -right-10 text-9xl opacity-[0.03] select-none font-serif">₹</span>
+
+        <!-- Status Pill -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-2 font-mono text-xs text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-3 py-1 rounded-full">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>CLOUD NODE ACTIVE</span>
+            </div>
+            <span class="text-xs text-slate-500 font-mono">v3.1 Supabase</span>
+        </div>
+
+        <h1 class="text-3xl sm:text-4xl font-black tracking-tight mb-1 text-white">
+            Sapna Juice <span class="text-amber-400 font-serif font-normal">ERP</span>
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-400 mb-8">Select your designated operational terminal to start session:</p>
+
+        <!-- THE 4 MASTER PORTAL BUTTONS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            
+            <!-- 1. ADMIN HQ -->
+            <a href="./admin/" class="group p-4 rounded-2xl bg-gradient-to-br from-slate-800/80 to-slate-900 border border-slate-700/80 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-500/10 transition-all text-left flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-2xl">👑</span>
+                    <span class="text-slate-600 group-hover:text-amber-400 transition-colors">→</span>
+                </div>
+                <div>
+                    <h2 class="font-black text-sm text-white group-hover:text-amber-300 transition-colors">Admin HQ</h2>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Store Layout, Menu Editor & Payroll</p>
+                </div>
+            </a>
+
+            <!-- 2. FRONT COUNTER -->
+            <a href="./counter/" class="group p-4 rounded-2xl bg-gradient-to-br from-slate-800/80 to-slate-900 border border-slate-700/80 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-500/10 transition-all text-left flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-2xl">🖥️</span>
+                    <span class="text-slate-600 group-hover:text-emerald-400 transition-colors">→</span>
+                </div>
+                <div>
+                    <h2 class="font-black text-sm text-white group-hover:text-emerald-300 transition-colors">Front Counter</h2>
+                    <p class="text-[11px] text-slate-400 mt-0.5">POS Billing, UPI QR & Takeaway</p>
+                </div>
+            </a>
+
+            <!-- 3. KITCHEN KDS -->
+            <a href="./kitchen/" class="group p-4 rounded-2xl bg-gradient-to-br from-slate-800/80 to-slate-900 border border-slate-700/80 hover:border-orange-400 hover:shadow-lg hover:shadow-orange-500/10 transition-all text-left flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-2xl">👨‍🍳</span>
+                    <span class="text-slate-600 group-hover:text-orange-400 transition-colors">→</span>
+                </div>
+                <div>
+                    <h2 class="font-black text-sm text-white group-hover:text-orange-300 transition-colors">Kitchen KDS</h2>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Live KOT Display & Status Punch</p>
+                </div>
+            </a>
+
+            <!-- 4. CAPTAIN PAD -->
+            <a href="./waiter/" class="group p-4 rounded-2xl bg-gradient-to-br from-slate-800/80 to-slate-900 border border-slate-700/80 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/10 transition-all text-left flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-2xl">📱</span>
+                    <span class="text-slate-600 group-hover:text-blue-400 transition-colors">→</span>
+                </div>
+                <div>
+                    <h2 class="font-black text-sm text-white group-hover:text-blue-300 transition-colors">Captain Pad</h2>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Table-side instant order taker</p>
+                </div>
+            </a>
+
+        </div>
+
+        <div class="mt-8 pt-4 border-t border-slate-800 text-center">
+            <p class="text-[10px] text-slate-500 uppercase tracking-widest font-mono">Pratapgarh / Mandsaur Secure Hub</p>
+        </div>
+
+    </div>
+
+</body>
+</html>
