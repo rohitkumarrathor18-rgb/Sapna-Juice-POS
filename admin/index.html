@@ -3,129 +3,338 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin HQ - Sapna Juice</title>
+    <title>Enterprise Admin HQ - Sapna Juice</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../sapna-core.js"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8 font-sans">
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8 font-sans selection:bg-amber-500 selection:text-black">
 
-    <div class="max-w-6xl mx-auto">
+    <div class="max-w-7xl mx-auto space-y-8">
         
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+        <!-- ================= Top Royal Banner ================= -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-2xl relative overflow-hidden">
+            <span class="absolute -right-10 -bottom-10 text-9xl font-serif text-white/[0.02] select-none">HQ</span>
             <div>
-                <h1 class="text-3xl font-black text-amber-400 flex items-center gap-3">
-                    <span>👑</span> Admin HQ
+                <div class="flex items-center gap-2 text-xs font-mono text-amber-400 mb-1">
+                    <span class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                    <span>SECURE CLOUD DISPATCHER</span>
+                </div>
+                <h1 class="text-3xl md:text-4xl font-black tracking-tight text-white">
+                    Sapna Juice <span class="text-amber-400 font-serif font-normal">Admin HQ</span>
                 </h1>
-                <p class="text-slate-400 text-sm mt-1">Manage Menu, Prices, Categories & Kitchens instantly.</p>
             </div>
-            <a href="../" class="mt-4 md:mt-0 bg-slate-800 border border-slate-700 hover:border-amber-400 px-5 py-2 rounded-xl transition-all font-bold text-sm">
-                ← Back to Central Hub
+            <a href="../" class="mt-4 md:mt-0 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold px-5 py-2.5 rounded-xl transition-all text-sm flex items-center gap-2">
+                ← Return to Central Hub
             </a>
         </div>
 
+        <!-- ================= ROW 1: THE 3 CREATION PILLARS ================= -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            <div class="space-y-6">
-                
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
-                    <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-800 pb-2">📂 Categories</h2>
-                    <div id="category-list" class="space-y-2 mb-4 max-h-[300px] overflow-y-auto pr-2">
-                        </div>
+            <!-- PILLAR 1: CATEGORY MANAGER -->
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-col justify-between shadow-xl">
+                <div>
+                    <h2 class="text-lg font-black text-white mb-3 flex items-center gap-2">📂 Categories</h2>
+                    <div id="category-list" class="space-y-2 max-h-[200px] overflow-y-auto pr-1">
+                        <span class="text-xs text-slate-500">Loading...</span>
+                    </div>
                 </div>
-
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
-                    <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-800 pb-2">🍳 Kitchen KDS Nodes</h2>
-                    <div id="kitchen-list" class="space-y-2 max-h-[300px] overflow-y-auto pr-2">
-                        </div>
-                </div>
-
+                <!-- ADD CATEGORY FORM -->
+                <form onsubmit="createNewCategory(event)" class="mt-4 pt-4 border-t border-slate-800/80 flex gap-2">
+                    <input id="new-cat-name" placeholder="New category name..." required class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-amber-400 w-full" />
+                    <button type="submit" class="bg-slate-800 hover:bg-amber-400 hover:text-black text-white font-bold px-4 py-2 rounded-xl text-xs transition-all shrink-0">+ Add</button>
+                </form>
             </div>
 
-            <div class="col-span-1 lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
-                <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-800 pb-2">🍔 Live Menu Builder</h2>
-                
-                <div id="menu-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[700px] overflow-y-auto pr-2">
-                    <div class="text-slate-500 animate-pulse p-4">Loading cloud menu...</div>
+            <!-- PILLAR 2: KITCHEN NODES -->
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-col justify-between shadow-xl">
+                <div>
+                    <h2 class="text-lg font-black text-white mb-3 flex items-center gap-2">🍳 Kitchen KDS Stations</h2>
+                    <div id="kitchen-list" class="space-y-2 max-h-[200px] overflow-y-auto pr-1">
+                        <span class="text-xs text-slate-500">Loading...</span>
+                    </div>
                 </div>
+                <!-- ADD KITCHEN FORM -->
+                <form onsubmit="createNewKitchen(event)" class="mt-4 pt-4 border-t border-slate-800/80 space-y-2">
+                    <div class="grid grid-cols-3 gap-2">
+                        <input id="new-kit-id" placeholder="ID (k1)" required class="bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-white text-xs outline-none focus:border-amber-400 font-mono" />
+                        <input id="new-kit-icon" placeholder="Icon" value="👨‍🍳" class="bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-center text-xs outline-none" />
+                        <input id="new-kit-name" placeholder="Name (Bar)" required class="bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-white text-xs outline-none focus:border-amber-400" />
+                    </div>
+                    <button type="submit" class="w-full bg-slate-800 hover:bg-amber-400 hover:text-black text-white font-bold py-2 rounded-xl text-xs transition-all">+ Register Station</button>
+                </form>
+            </div>
+
+            <!-- PILLAR 3: ADD NEW MENU ITEM FORM -->
+            <div class="bg-slate-900 border border-amber-500/30 rounded-3xl p-5 shadow-xl bg-gradient-to-br from-slate-900 to-slate-900/90">
+                <h2 class="text-lg font-black text-amber-400 mb-3 flex items-center gap-2">⚡ Quick Product Creator</h2>
+                <form onsubmit="createNewMenuItem(event)" class="space-y-3">
+                    <div>
+                        <label class="text-[10px] text-slate-400 uppercase font-mono tracking-wider">Product Name</label>
+                        <input id="new-item-name" placeholder="e.g. Special Dry Fruit Shake" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-amber-400 font-bold mt-0.5" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[10px] text-slate-400 uppercase font-mono tracking-wider">Category</label>
+                            <select id="new-item-cat" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-white text-xs outline-none focus:border-amber-400 mt-0.5"></select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400 uppercase font-mono tracking-wider">Price (₹)</label>
+                            <input id="new-item-price" type="number" placeholder="120" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-amber-400 text-xs outline-none focus:border-amber-400 font-black text-right mt-0.5" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-400 uppercase font-mono tracking-wider">Dispatch Kitchen</label>
+                        <select id="new-item-kit" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-white text-xs outline-none focus:border-amber-400 mt-0.5"></select>
+                    </div>
+                    <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 rounded-xl transition-all text-xs tracking-wider uppercase shadow-lg shadow-amber-500/10">
+                        + Push Item to Cloud
+                    </button>
+                </form>
             </div>
 
         </div>
+
+        <!-- ================= ROW 2: LIVE MENU INVENTORY ================= -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
+                <h2 class="text-xl font-black text-white flex items-center gap-2">🍔 Live Menu Inventory</h2>
+                <span class="text-xs font-mono text-slate-400">Live DB Sync Active</span>
+            </div>
+            
+            <div id="menu-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[500px] overflow-y-auto pr-2">
+                <div class="text-slate-500 text-xs animate-pulse">Fetching cloud items...</div>
+            </div>
+        </div>
+
+        <!-- ================= ROW 3: STAFF & PAYROLL MANAGER ================= -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
+                <div>
+                    <h2 class="text-xl font-black text-white flex items-center gap-2">👥 Staff & Payroll Engine</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Track daily attendance, base payouts, and instant cash advances.</p>
+                </div>
+                
+                <!-- REGISTER STAFF FORM -->
+                <form onsubmit="createNewStaff(event)" class="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto">
+                    <input id="new-staff-name" placeholder="Staff Name..." required class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-white text-xs outline-none focus:border-amber-400" />
+                    <select id="new-staff-role" class="bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-white text-xs outline-none">
+                        <option value="Waiter">Waiter</option>
+                        <option value="Cashier">Cashier</option>
+                        <option value="Chef">Chef</option>
+                        <option value="Cleaner">Cleaner</option>
+                    </select>
+                    <input id="new-staff-salary" type="number" placeholder="Salary ₹" required class="w-24 bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-amber-400 font-bold text-xs outline-none" />
+                    <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-4 py-1.5 rounded-xl text-xs transition-all shrink-0">+ Register</button>
+                </form>
+            </div>
+
+            <div id="staff-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                <div class="text-slate-500 text-xs animate-pulse">Fetching staff roster...</div>
+            </div>
+        </div>
+
     </div>
 
+    <!-- ================= JAVASCRIPT MASTER BRAIN ================= -->
     <script>
-        // Jab bhi cloud se naya data aaye, screen ko update karo
+        // 1. DATA RECEIVER EVENT
         window.addEventListener('SAPNA_STATE_UPDATED', (e) => {
             const db = e.detail;
             renderCategories(db.categories);
             renderKitchens(db.kitchens);
             renderMenu(db.menu);
+            renderStaff(db.staff);
         });
 
-        // 1. RENDER CATEGORIES
-        function renderCategories(categories) {
-            const container = document.getElementById('category-list');
-            if(!categories || categories.length === 0) {
-                container.innerHTML = `<p class="text-slate-500 text-sm">No categories found.</p>`;
-                return;
-            }
-            container.innerHTML = categories.map(cat => `
-                <div class="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
-                    <span class="font-bold text-sm">${cat}</span>
-                    <button onclick="window.Sapna.delCategory('${cat}')" class="text-red-500 hover:bg-red-500/20 px-2 py-1 rounded text-xs font-bold transition-colors">Delete</button>
-                </div>
-            `).join('');
+        function getCache() {
+            return window.Sapna ? window.Sapna.cache : null;
         }
 
-        // 2. RENDER KITCHENS
-        function renderKitchens(kitchens) {
-            const container = document.getElementById('kitchen-list');
-            if(!kitchens || kitchens.length === 0) {
-                container.innerHTML = `<p class="text-slate-500 text-sm">No kitchens found.</p>`;
-                return;
-            }
-            container.innerHTML = kitchens.map(kit => `
-                <div class="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
-                    <span class="font-bold text-sm">${kit.icon} ${kit.name}</span>
-                    <button onclick="window.Sapna.delKitchen('${kit.id}')" class="text-red-500 hover:bg-red-500/20 px-2 py-1 rounded text-xs font-bold transition-colors">Delete</button>
-                </div>
-            `).join('');
-        }
-
-        // 3. RENDER MENU WITH LIVE PRICE BOX
-        function renderMenu(menuItems) {
-            const container = document.getElementById('menu-list');
-            if(!menuItems || menuItems.length === 0) {
-                container.innerHTML = `<p class="text-slate-500 text-sm">Menu is empty.</p>`;
-                return;
-            }
+        // ================= UI RENDERING LOGIC =================
+        function renderCategories(cats) {
+            const list = document.getElementById('category-list');
+            const select = document.getElementById('new-item-cat');
+            if(!cats || cats.length === 0) return list.innerHTML = `<p class="text-xs text-slate-500">No categories</p>`;
             
-            container.innerHTML = menuItems.map(item => `
-                <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl flex justify-between items-center hover:border-slate-600 transition-colors">
-                    <div class="overflow-hidden">
-                        <h3 class="font-bold text-white text-sm truncate" title="${item.name}">${item.name}</h3>
-                        <p class="text-[11px] text-slate-400 mt-0.5">${item.category}</p>
+            list.innerHTML = cats.map(c => `
+                <div class="flex justify-between items-center bg-slate-950 px-3 py-2 rounded-xl border border-slate-800/80">
+                    <span class="font-bold text-xs text-slate-200">${c}</span>
+                    <button onclick="window.Sapna.delCategory('${c}')" class="text-red-400 hover:text-red-300 font-bold text-[11px]">Delete</button>
+                </div>
+            `).join('');
+
+            if(select) select.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
+        function renderKitchens(kits) {
+            const list = document.getElementById('kitchen-list');
+            const select = document.getElementById('new-item-kit');
+            if(!kits || kits.length === 0) return list.innerHTML = `<p class="text-xs text-slate-500">No kitchens</p>`;
+
+            list.innerHTML = kits.map(k => `
+                <div class="flex justify-between items-center bg-slate-950 px-3 py-2 rounded-xl border border-slate-800/80">
+                    <span class="font-bold text-xs text-slate-200">${k.icon} ${k.name} <span class="text-[10px] text-slate-500 font-mono">(${k.id})</span></span>
+                    <button onclick="window.Sapna.delKitchen('${k.id}')" class="text-red-400 hover:text-red-300 font-bold text-[11px]">Delete</button>
+                </div>
+            `).join('');
+
+            if(select) select.innerHTML = kits.map(k => `<option value="${k.id}">${k.name} (${k.icon})</option>`).join('');
+        }
+
+        function renderMenu(items) {
+            const list = document.getElementById('menu-list');
+            if(!items || items.length === 0) return list.innerHTML = `<p class="text-xs text-slate-500">Menu is empty</p>`;
+
+            list.innerHTML = items.map(m => `
+                <div class="bg-slate-950 border border-slate-800/80 p-3 rounded-2xl flex justify-between items-center hover:border-slate-700 transition-all">
+                    <div class="overflow-hidden pr-2">
+                        <h3 class="font-bold text-white text-xs truncate">${m.name}</h3>
+                        <p class="text-[10px] text-slate-400 mt-0.5">${m.category}</p>
                     </div>
-                    
                     <div class="flex items-center gap-2 shrink-0">
-                        <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg px-2 focus-within:border-amber-400 transition-colors">
-                            <span class="text-slate-500 text-xs font-serif">₹</span>
-                            <input type="number" 
-                                value="${item.price}"
-                                onchange="window.Sapna.quickPriceUpdate('${item.id}', this.value)"
-                                class="w-14 bg-transparent text-amber-400 font-bold p-1.5 outline-none text-right text-sm" 
-                            />
+                        <div class="flex items-center bg-slate-900 border border-slate-700 rounded-xl px-2 focus-within:border-amber-400">
+                            <span class="text-[10px] text-slate-500 font-serif">₹</span>
+                            <input type="number" value="${m.price}" onchange="window.Sapna.quickPriceUpdate('${m.id}', this.value)"
+                                class="w-12 bg-transparent text-amber-400 font-black text-xs text-right py-1 outline-none" />
                         </div>
-                        
-                        <button onclick="window.Sapna.delMenu('${item.id}')"
-                            class="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white p-2 rounded-lg transition-colors" title="Delete Item">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
+                        <button onclick="window.Sapna.delMenu('${m.id}')" class="text-slate-500 hover:text-red-400 p-1 transition-colors" title="Delete">🗑️</button>
                     </div>
                 </div>
             `).join('');
         }
+
+        function renderStaff(staff) {
+            const list = document.getElementById('staff-list');
+            if(!staff || staff.length === 0) return list.innerHTML = `<p class="text-xs text-slate-500">No staff registered</p>`;
+
+            list.innerHTML = staff.map(s => `
+                <div class="bg-slate-950 border border-slate-800 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-black text-white text-sm">${s.name}</span>
+                            <button onclick="toggleStaffStatus('${s.id}', '${s.statusToday}')" 
+                                class="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold uppercase transition-all ${s.statusToday === 'Present' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/10 text-red-400 border border-red-500/30'}">
+                                ● ${s.statusToday || 'Present'}
+                            </button>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1">Role: <span class="text-amber-400 font-medium">${s.role}</span> | Base: ₹${s.baseSalary}</p>
+                    </div>
+                    <div class="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end">
+                        <div class="flex items-center bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1">
+                            <span class="text-[10px] text-slate-500 mr-1">Adv: ₹</span>
+                            <input type="number" value="${s.advanceTaken || 0}" onchange="updateStaffAdvance('${s.id}', this.value)"
+                                class="w-14 bg-transparent text-amber-400 font-bold text-xs text-right outline-none" />
+                        </div>
+                        <button onclick="deleteStaffMember('${s.id}')" class="text-slate-600 hover:text-red-400 transition-colors text-sm">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ================= CREATION FORM ACTIONS (Bina page refresh kiye save) =================
+        function createNewCategory(e) {
+            e.preventDefault();
+            const val = document.getElementById('new-cat-name').value.trim();
+            const cache = getCache();
+            if(!val || !cache) return;
+
+            if(!cache.categories.includes(val)) {
+                cache.categories.push(val);
+                window.Sapna.save(cache);
+                document.getElementById('new-cat-name').value = '';
+            } else alert('Category pehle se hai!');
+        }
+
+        function createNewKitchen(e) {
+            e.preventDefault();
+            const idVal = document.getElementById('new-kit-id').value.trim().toLowerCase().replace(/\s+/g, '-');
+            const nameVal = document.getElementById('new-kit-name').value.trim();
+            const iconVal = document.getElementById('new-kit-icon').value.trim() || '🍳';
+            const cache = getCache();
+            if(!cache) return;
+
+            if(!cache.kitchens.some(k => k.id === idVal)) {
+                cache.kitchens.push({ id: idVal, name: nameVal, icon: iconVal });
+                window.Sapna.save(cache);
+                document.getElementById('new-kit-id').value = '';
+                document.getElementById('new-kit-name').value = '';
+            } else alert('Is ID ka kitchen pehle se hai!');
+        }
+
+        function createNewMenuItem(e) {
+            e.preventDefault();
+            const nameVal = document.getElementById('new-item-name').value.trim();
+            const catVal = document.getElementById('new-item-cat').value;
+            const priceVal = parseFloat(document.getElementById('new-item-price').value);
+            const kitVal = document.getElementById('new-item-kit').value;
+            const cache = getCache();
+
+            if(!nameVal || !catVal || isNaN(priceVal) || !cache) return;
+
+            cache.menu.push({
+                id: 'item-' + Date.now(),
+                name: nameVal,
+                category: catVal,
+                price: priceVal,
+                kitchenId: kitVal || 'k1'
+            });
+
+            window.Sapna.save(cache);
+            document.getElementById('new-item-name').value = '';
+            document.getElementById('new-item-price').value = '';
+        }
+
+        function createNewStaff(e) {
+            e.preventDefault();
+            const nameVal = document.getElementById('new-staff-name').value.trim();
+            const roleVal = document.getElementById('new-staff-role').value;
+            const salaryVal = parseFloat(document.getElementById('new-staff-salary').value) || 0;
+            const cache = getCache();
+            if(!nameVal || !cache) return;
+
+            cache.staff.push({
+                id: 'staff-' + Date.now(),
+                name: nameVal,
+                role: roleVal,
+                baseSalary: salaryVal,
+                advanceTaken: 0,
+                statusToday: 'Present'
+            });
+
+            window.Sapna.save(cache);
+            document.getElementById('new-staff-name').value = '';
+            document.getElementById('new-staff-salary').value = '';
+        }
+
+        // STAFF HELPERS
+        function updateStaffAdvance(id, val) {
+            const cache = getCache();
+            const person = cache.staff.find(s => s.id === id);
+            if(person) { person.advanceTaken = parseFloat(val) || 0; window.Sapna.save(cache); }
+        }
+
+        function toggleStaffStatus(id, curr) {
+            const cache = getCache();
+            const person = cache.staff.find(s => s.id === id);
+            if(person) { person.statusToday = curr === 'Present' ? 'Absent' : 'Present'; window.Sapna.save(cache); }
+        }
+
+        async function deleteStaffMember(id) {
+            if(!confirm('Delete this staff record?')) return;
+            const cache = getCache();
+            cache.staff = cache.staff.filter(s => s.id !== id);
+            window.Sapna.save(cache);
+            if(window.Sapna.sb) await window.Sapna.sb.from('staff').delete().eq('id', id);
+        }
+
+        // FALLBACK BOOTSTRAPPER: Agar core engine pehle hi load ho chuka ho
+        setTimeout(() => {
+            if(window.Sapna && window.Sapna.cache && window.Sapna.cache.menu) {
+                window.dispatchEvent(new CustomEvent('SAPNA_STATE_UPDATED', { detail: window.Sapna.cache }));
+            }
+        }, 600);
     </script>
 </body>
 </html>
