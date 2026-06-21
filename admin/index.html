@@ -3,338 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise Admin HQ - Sapna Juice</title>
+    <title>Sapna ERP - Store Controller</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../sapna-core.js"></script>
+    <style>
+        body { background-color: #f1f5f9; color: #0f172a; }
+        button, input, select { touch-action: manipulation; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8 font-sans selection:bg-amber-500 selection:text-black">
+<body class="font-sans flex flex-col min-h-screen select-none">
 
-    <div class="max-w-7xl mx-auto space-y-8">
-        
-        <!-- ================= Top Royal Banner ================= -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-2xl relative overflow-hidden">
-            <span class="absolute -right-10 -bottom-10 text-9xl font-serif text-white/[0.02] select-none">HQ</span>
+    <!-- TOP HEADER -->
+    <header class="bg-emerald-900 text-white sticky top-0 z-40 shadow-xl border-b border-emerald-800 px-4 sm:px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-white text-emerald-950 rounded-2xl flex items-center justify-center font-black text-2xl shadow-md shrink-0">👑</div>
             <div>
-                <div class="flex items-center gap-2 text-xs font-mono text-amber-400 mb-1">
-                    <span class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-                    <span>SECURE CLOUD DISPATCHER</span>
-                </div>
-                <h1 class="text-3xl md:text-4xl font-black tracking-tight text-white">
-                    Sapna Juice <span class="text-amber-400 font-serif font-normal">Admin HQ</span>
-                </h1>
+                <h1 class="text-xl font-black tracking-wide text-white">SAPNA JUICE <span class="text-amber-300 font-normal">| Admin HQ</span></h1>
+                <p class="text-xs text-emerald-200 font-medium">Smart Sequence Deployer v7</p>
             </div>
-            <a href="../" class="mt-4 md:mt-0 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold px-5 py-2.5 rounded-xl transition-all text-sm flex items-center gap-2">
-                ← Return to Central Hub
-            </a>
         </div>
 
-        <!-- ================= ROW 1: THE 3 CREATION PILLARS ================= -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="flex gap-1.5 bg-emerald-950 p-1.5 rounded-2xl border border-emerald-800 max-w-full overflow-x-auto shrink-0">
+            <button onclick="switchTab('DASH')" id="btn_DASH" class="px-5 py-2 rounded-xl text-xs font-black uppercase transition bg-white text-emerald-950 shadow whitespace-nowrap">📊 Dashboard</button>
+            <button onclick="switchTab('SETUP')" id="btn_SETUP" class="px-5 py-2 rounded-xl text-xs font-bold uppercase transition text-emerald-200 hover:text-white whitespace-nowrap">🏗️ Store Setup</button>
+            <button onclick="switchTab('MENU')" id="btn_MENU" class="px-5 py-2 rounded-xl text-xs font-bold uppercase transition text-emerald-200 hover:text-white whitespace-nowrap">🍔 Menu</button>
+            <button onclick="switchTab('STAFF')" id="btn_STAFF" class="px-5 py-2 rounded-xl text-xs font-bold uppercase transition text-emerald-200 hover:text-white whitespace-nowrap">👥 Staff</button>
+        </div>
+    </header>
 
-            <!-- PILLAR 1: CATEGORY MANAGER -->
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-col justify-between shadow-xl">
-                <div>
-                    <h2 class="text-lg font-black text-white mb-3 flex items-center gap-2">📂 Categories</h2>
-                    <div id="category-list" class="space-y-2 max-h-[200px] overflow-y-auto pr-1">
-                        <span class="text-xs text-slate-500">Loading...</span>
-                    </div>
+    <div class="flex-1 p-4 sm:p-8 max-w-7xl mx-auto w-full">
+
+        <!-- TAB 1: DASHBOARD -->
+        <div id="tab_DASH" class="space-y-6 block">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <span class="text-xs font-bold text-slate-400 uppercase">Live Tables</span>
+                    <h3 class="text-4xl font-black text-slate-800 mt-2" id="boxTables">0</h3>
                 </div>
-                <!-- ADD CATEGORY FORM -->
-                <form onsubmit="createNewCategory(event)" class="mt-4 pt-4 border-t border-slate-800/80 flex gap-2">
-                    <input id="new-cat-name" placeholder="New category name..." required class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-amber-400 w-full" />
-                    <button type="submit" class="bg-slate-800 hover:bg-amber-400 hover:text-black text-white font-bold px-4 py-2 rounded-xl text-xs transition-all shrink-0">+ Add</button>
-                </form>
-            </div>
-
-            <!-- PILLAR 2: KITCHEN NODES -->
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-col justify-between shadow-xl">
-                <div>
-                    <h2 class="text-lg font-black text-white mb-3 flex items-center gap-2">🍳 Kitchen KDS Stations</h2>
-                    <div id="kitchen-list" class="space-y-2 max-h-[200px] overflow-y-auto pr-1">
-                        <span class="text-xs text-slate-500">Loading...</span>
-                    </div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <span class="text-xs font-bold text-slate-400 uppercase">Menu Items</span>
+                    <h3 class="text-4xl font-black text-slate-800 mt-2" id="boxMenu">0</h3>
                 </div>
-                <!-- ADD KITCHEN FORM -->
-                <form onsubmit="createNewKitchen(event)" class="mt-4 pt-4 border-t border-slate-800/80 space-y-2">
-                    <div class="grid grid-cols-3 gap-2">
-                        <input id="new-kit-id" placeholder="ID (k1)" required class="bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-white text-xs outline-none focus:border-amber-400 font-mono" />
-                        <input id="new-kit-icon" placeholder="Icon" value="👨‍🍳" class="bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-center text-xs outline-none" />
-                        <input id="new-kit-name" placeholder="Name (Bar)" required class="bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-white text-xs outline-none focus:border-amber-400" />
-                    </div>
-                    <button type="submit" class="w-full bg-slate-800 hover:bg-amber-400 hover:text-black text-white font-bold py-2 rounded-xl text-xs transition-all">+ Register Station</button>
-                </form>
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <span class="text-xs font-bold text-slate-400 uppercase">Kitchen Nodes</span>
+                    <h3 class="text-4xl font-black text-slate-800 mt-2" id="boxKitchens">0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <span class="text-xs font-bold text-slate-400 uppercase">Active Staff</span>
+                    <h3 class="text-4xl font-black text-slate-800 mt-2" id="boxStaff">0</h3>
+                </div>
             </div>
 
-            <!-- PILLAR 3: ADD NEW MENU ITEM FORM -->
-            <div class="bg-slate-900 border border-amber-500/30 rounded-3xl p-5 shadow-xl bg-gradient-to-br from-slate-900 to-slate-900/90">
-                <h2 class="text-lg font-black text-amber-400 mb-3 flex items-center gap-2">⚡ Quick Product Creator</h2>
-                <form onsubmit="createNewMenuItem(event)" class="space-y-3">
-                    <div>
-                        <label class="text-[10px] text-slate-400 uppercase font-mono tracking-wider">Product Name</label>
-                        <input id="new-item-name" placeholder="e.g. Special Dry Fruit Shake" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-amber-400 font-bold mt-0.5" />
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-[10px] text-slate-400 uppercase font-mono tracking-wider">Category</label>
-                            <select id="new-item-cat" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-white text-xs outline-none focus:border-amber-400 mt-0.5"></select>
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-slate-400 uppercase font-mono tracking-wider">Price (₹)</label>
-                            <input id="new-item-price" type="number" placeholder="120" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-amber-400 text-xs outline-none focus:border-amber-400 font-black text-right mt-0.5" />
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-slate-400 uppercase font-mono tracking-wider">Dispatch Kitchen</label>
-                        <select id="new-item-kit" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-white text-xs outline-none focus:border-amber-400 mt-0.5"></select>
-                    </div>
-                    <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 rounded-xl transition-all text-xs tracking-wider uppercase shadow-lg shadow-amber-500/10">
-                        + Push Item to Cloud
-                    </button>
-                </form>
+            <!-- Health Strip -->
+            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <span class="relative flex h-3.5 w-3.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500"></span></span>
+                    <div class="text-left"><span class="text-xs font-bold text-slate-800 block uppercase">Cloud Engine</span><span class="text-xs font-mono font-bold text-emerald-600">Supabase DB Sync : SECURED</span></div>
+                </div>
+                <button onclick="window.location.reload()" class="px-4 py-2 bg-slate-100 hover:bg-emerald-50 text-slate-700 font-bold text-xs rounded-xl">🔄 Refresh</button>
             </div>
-
         </div>
 
-        <!-- ================= ROW 2: LIVE MENU INVENTORY ================= -->
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
-            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
-                <h2 class="text-xl font-black text-white flex items-center gap-2">🍔 Live Menu Inventory</h2>
-                <span class="text-xs font-mono text-slate-400">Live DB Sync Active</span>
-            </div>
+        <!-- TAB 2: STORE SETUP (WITH ALPHANUMERIC SEQUENCE GENERATOR) -->
+        <div id="tab_SETUP" class="grid grid-cols-1 lg:grid-cols-3 gap-6 hidden">
             
-            <div id="menu-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[500px] overflow-y-auto pr-2">
-                <div class="text-slate-500 text-xs animate-pulse">Fetching cloud items...</div>
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col h-[480px]">
+                <h2 class="text-sm font-black text-purple-700 uppercase tracking-wider mb-4 flex items-center gap-2"><span>📂</span> 1. Menu Categories</h2>
+                <form id="formAddCategory" class="flex gap-2 mb-4 shrink-0">
+                    <input type="text" id="inpCatName" required placeholder="Category (e.g. Shakes)" class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold text-xs outline-none focus:bg-white focus:border-purple-500">
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-black px-4 py-2 rounded-xl text-xs uppercase">Add</button>
+                </form>
+                <div class="flex-1 overflow-y-auto pr-1"><table class="w-full text-left border-collapse text-xs font-bold"><tbody id="tbodyCategories" class="divide-y divide-slate-100 text-slate-700"></tbody></table></div>
             </div>
+
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col h-[480px]">
+                <h2 class="text-sm font-black text-amber-600 uppercase tracking-wider mb-4 flex items-center gap-2"><span>🔥</span> 2. Kitchen Stations</h2>
+                <form id="formAddKitchen" class="flex gap-2 mb-4 shrink-0">
+                    <input type="text" id="inpKitName" required placeholder="Station Name (Juice Bar)" class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold text-xs outline-none focus:bg-white focus:border-amber-500">
+                    <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-4 py-2 rounded-xl text-xs uppercase">Add</button>
+                </form>
+                <div class="flex-1 overflow-y-auto pr-1"><table class="w-full text-left border-collapse text-xs font-bold"><tbody id="tbodyKitchens" class="divide-y divide-slate-100 text-slate-700"></tbody></table></div>
+            </div>
+
+            <!-- SMART SEQUENCE SEATING GENERATOR -->
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col h-[480px]">
+                <h2 class="text-sm font-black text-blue-600 uppercase tracking-wider mb-4 flex items-center gap-2"><span>🪑</span> 3. Smart Table Deployer</h2>
+                
+                <form id="formAddTable" class="grid grid-cols-4 gap-1.5 mb-4 shrink-0">
+                    <input type="text" id="inpTblArea" required placeholder="Zone (AC Hall)" class="col-span-2 bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-2 font-bold text-xs outline-none focus:bg-white focus:border-blue-500">
+                    <input type="text" id="inpTblStart" required placeholder="Start (8 or A1)" class="col-span-1 bg-slate-50 border border-slate-300 rounded-xl px-2 py-2 font-bold text-xs text-center outline-none focus:bg-white focus:border-blue-500">
+                    <input type="number" id="inpTblCount" required min="1" max="40" placeholder="Qty (4)" class="col-span-1 bg-slate-50 border border-slate-300 rounded-xl px-2 py-2 font-black text-xs text-center outline-none focus:bg-white focus:border-blue-500">
+                    <button type="submit" class="col-span-4 bg-blue-600 hover:bg-blue-700 text-white font-black py-2 rounded-xl text-xs uppercase tracking-wide mt-0.5">Deploy Smart Sequence</button>
+                </form>
+                
+                <div class="flex-1 overflow-y-auto pr-1"><table class="w-full text-left border-collapse text-xs font-bold"><tbody id="tbodyTables" class="divide-y divide-slate-100 text-slate-700"></tbody></table></div>
+            </div>
+
         </div>
 
-        <!-- ================= ROW 3: STAFF & PAYROLL MANAGER ================= -->
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
-                <div>
-                    <h2 class="text-xl font-black text-white flex items-center gap-2">👥 Staff & Payroll Engine</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Track daily attendance, base payouts, and instant cash advances.</p>
-                </div>
-                
-                <!-- REGISTER STAFF FORM -->
-                <form onsubmit="createNewStaff(event)" class="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto">
-                    <input id="new-staff-name" placeholder="Staff Name..." required class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-white text-xs outline-none focus:border-amber-400" />
-                    <select id="new-staff-role" class="bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-white text-xs outline-none">
-                        <option value="Waiter">Waiter</option>
-                        <option value="Cashier">Cashier</option>
-                        <option value="Chef">Chef</option>
-                        <option value="Cleaner">Cleaner</option>
-                    </select>
-                    <input id="new-staff-salary" type="number" placeholder="Salary ₹" required class="w-24 bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-amber-400 font-bold text-xs outline-none" />
-                    <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-4 py-1.5 rounded-xl text-xs transition-all shrink-0">+ Register</button>
+        <!-- TAB 3: MENU BUILDER -->
+        <div id="tab_MENU" class="grid grid-cols-1 lg:grid-cols-3 gap-6 hidden">
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm h-fit">
+                <h2 class="text-sm font-black text-emerald-700 uppercase tracking-wider mb-4 flex items-center gap-2"><span>🍔</span> Push Product</h2>
+                <form id="formAddMenu" class="space-y-3.5">
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Product Name</label><input type="text" id="inpMenuName" required placeholder="KitKat Shake" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold text-xs outline-none focus:bg-white focus:border-emerald-600"></div>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Category</label><select id="inpMenuCat" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2 py-2 font-bold text-xs outline-none focus:bg-white"></select></div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Price (₹)</label><input type="number" id="inpMenuPrice" required min="1" placeholder="120" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-black text-xs outline-none focus:bg-white focus:border-emerald-600 text-right"></div>
+                    </div>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Dispatch Station</label><select id="inpMenuKit" class="w-full bg-emerald-50 border border-emerald-300 text-emerald-950 font-black rounded-xl px-3 py-2 text-xs outline-none"></select></div>
+                    <button type="submit" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-black py-3 rounded-xl shadow transition text-xs uppercase tracking-wider mt-2">+ Push to Live Catalog</button>
                 </form>
             </div>
 
-            <div id="staff-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                <div class="text-slate-500 text-xs animate-pulse">Fetching staff roster...</div>
+            <div class="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col h-[550px]">
+                <h2 class="text-sm font-black text-slate-700 uppercase tracking-wider mb-4">Live POS Catalog</h2>
+                <div class="flex-1 overflow-y-auto pr-1"><table class="w-full text-left border-collapse text-xs"><thead class="bg-slate-100 text-slate-500 uppercase font-black text-[10px] sticky top-0"><tr><th class="p-3">Item</th><th class="p-3">Category</th><th class="p-3">Routing</th><th class="p-3 text-right">Live Price</th><th class="p-3 text-center w-16">Action</th></tr></thead><tbody id="tbodyMenu" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody></table></div>
+            </div>
+        </div>
+
+        <!-- TAB 4: STAFF ERP -->
+        <div id="tab_STAFF" class="grid grid-cols-1 lg:grid-cols-3 gap-6 hidden">
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm h-fit">
+                <h2 class="text-sm font-black text-emerald-800 uppercase tracking-wider mb-4 flex items-center gap-2"><span>🧑‍🍳</span> Register Staff</h2>
+                <form id="formAddStaff" class="space-y-3.5">
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Full Name</label><input type="text" id="inpStfName" required placeholder="Hari Om" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold text-xs outline-none focus:bg-white"></div>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Role</label><select id="inpStfRole" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2 py-2 font-bold text-xs outline-none focus:bg-white"><option>Chef</option><option>Waiter</option><option>Cashier</option><option>Cleaner</option></select></div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Base (₹)</label><input type="number" id="inpStfSalary" required min="1000" placeholder="15000" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold text-xs outline-none focus:bg-white text-right"></div>
+                    </div>
+                    <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-black py-3 rounded-xl shadow transition text-xs uppercase tracking-wider mt-2">+ Hire</button>
+                </form>
+            </div>
+
+            <div class="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col h-[550px]">
+                <h2 class="text-sm font-black text-slate-700 uppercase tracking-wider mb-4">Salary & Advance Ledger</h2>
+                <div class="flex-1 overflow-y-auto pr-1"><table class="w-full text-left border-collapse text-xs"><thead class="bg-slate-100 text-slate-500 uppercase font-black text-[10px] sticky top-0"><tr><th class="p-3">Employee</th><th class="p-3 text-center">Haziri</th><th class="p-3 text-right">Base</th><th class="p-3 w-28 text-center">Advance (-)</th><th class="p-3 text-right bg-emerald-50">Net Pay</th><th class="p-3 text-center w-20">Action</th></tr></thead><tbody id="tbodyStaff" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody></table></div>
             </div>
         </div>
 
     </div>
 
-    <!-- ================= JAVASCRIPT MASTER BRAIN ================= -->
     <script>
-        // 1. DATA RECEIVER EVENT
-        window.addEventListener('SAPNA_STATE_UPDATED', (e) => {
-            const db = e.detail;
-            renderCategories(db.categories);
-            renderKitchens(db.kitchens);
-            renderMenu(db.menu);
-            renderStaff(db.staff);
-        });
+        const ALL_TABS = ['DASH', 'SETUP', 'MENU', 'STAFF'];
+        function getDB() { return window.Sapna ? window.Sapna.cache : null; }
 
-        function getCache() {
-            return window.Sapna ? window.Sapna.cache : null;
+        function switchTab(target) {
+            ALL_TABS.forEach(t => { document.getElementById('tab_' + t).classList.add('hidden'); document.getElementById('btn_' + t).className = "px-5 py-2 rounded-xl text-xs font-bold uppercase transition text-emerald-200 hover:text-white whitespace-nowrap"; });
+            document.getElementById('tab_' + target).classList.remove('hidden'); document.getElementById('btn_' + target).className = "px-5 py-2 rounded-xl text-xs font-black uppercase transition bg-white text-emerald-950 shadow whitespace-nowrap";
+            refreshViews();
         }
 
-        // ================= UI RENDERING LOGIC =================
-        function renderCategories(cats) {
-            const list = document.getElementById('category-list');
-            const select = document.getElementById('new-item-cat');
-            if(!cats || cats.length === 0) return list.innerHTML = `<p class="text-xs text-slate-500">No categories</p>`;
-            
-            list.innerHTML = cats.map(c => `
-                <div class="flex justify-between items-center bg-slate-950 px-3 py-2 rounded-xl border border-slate-800/80">
-                    <span class="font-bold text-xs text-slate-200">${c}</span>
-                    <button onclick="window.Sapna.delCategory('${c}')" class="text-red-400 hover:text-red-300 font-bold text-[11px]">Delete</button>
-                </div>
-            `).join('');
+        function refreshViews() {
+            const db = getDB(); if(!db) return;
+            document.getElementById('boxTables').innerText = db.tables ? db.tables.length : 0;
+            document.getElementById('boxMenu').innerText = db.menu ? db.menu.length : 0;
+            document.getElementById('boxKitchens').innerText = db.kitchens ? db.kitchens.length : 0;
+            document.getElementById('boxStaff').innerText = db.staff ? db.staff.length : 0;
 
-            if(select) select.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+            const tc=document.getElementById('tbodyCategories'); tc.innerHTML='';
+            if(db.categories) { db.categories.forEach(c => { tc.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-2.5">${c}</td><td class="p-2.5 text-right"><button onclick="rmCat('${c}')" class="text-red-500 font-bold px-2 py-0.5 hover:bg-red-50 rounded text-[11px]">Del</button></td></tr>`; }); const selCat=document.getElementById('inpMenuCat'); if(selCat) selCat.innerHTML=db.categories.map(c=>`<option value="${c}">${c}</option>`).join(''); }
+
+            const tk=document.getElementById('tbodyKitchens'); tk.innerHTML='';
+            if(db.kitchens) { db.kitchens.forEach(k => { tk.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-2.5"><span class="font-black text-[10px] bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded">${k.id}</span> <span class="ml-2">${k.name}</span></td><td class="p-2.5 text-right"><button onclick="rmKit('${k.id}')" class="text-red-500 font-bold px-2 py-0.5 hover:bg-red-50 rounded text-[11px]">Del</button></td></tr>`; }); const selKit=document.getElementById('inpMenuKit'); if(selKit) selKit.innerHTML=db.kitchens.map(k=>`<option value="${k.id}">${k.name}</option>`).join(''); }
+
+            const tt=document.getElementById('tbodyTables'); tt.innerHTML='';
+            if(db.tables) { db.tables.forEach(t => { tt.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-2.5"><span class="font-black text-[10px] bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded">${t.area||'Hall'}</span> <span class="ml-2 text-blue-700">${t.label}</span></td><td class="p-2.5 text-right"><button onclick="rmTbl('${t.id}')" class="text-red-500 font-bold px-2 py-0.5 hover:bg-red-50 rounded text-[11px]">Del</button></td></tr>`; }); }
+
+            const tm=document.getElementById('tbodyMenu'); tm.innerHTML='';
+            if(db.menu) { db.menu.forEach(m => { let kitName=db.kitchens?.find(x=>x.id===m.kitchenId)?.name||'Bar'; tm.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-3 font-bold">${m.name}</td><td class="p-3 text-slate-400">${m.category}</td><td class="p-3"><span class="bg-emerald-50 text-emerald-900 border border-emerald-200 px-2 py-0.5 rounded text-[10px] font-black">${kitName}</span></td><td class="p-3 text-right"><div class="inline-flex items-center bg-slate-50 border rounded-lg px-2"><span class="text-[10px] text-slate-400 font-serif mr-0.5">₹</span><input type="number" value="${m.price}" onchange="window.Sapna.quickPriceUpdate('${m.id}', this.value)" class="w-12 bg-transparent text-emerald-700 font-black text-right py-1 outline-none text-xs font-mono" /></div></td><td class="p-3 text-center"><button onclick="rmMenu('${m.id}')" class="text-red-500 font-bold px-2 py-1 hover:bg-red-50 rounded">Del</button></td></tr>`; }); }
+
+            const ts=document.getElementById('tbodyStaff'); ts.innerHTML='';
+            if(db.staff) { db.staff.forEach(s => { let adv=Number(s.advanceTaken)||0; let net=s.baseSalary-adv; ts.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-3 font-bold">${s.name} <span class="text-[10px] font-normal text-slate-400 block">${s.role}</span></td><td class="p-3 text-center"><button onclick="togHaziri('${s.id}')" class="px-2 py-0.5 rounded text-[10px] font-black ${s.statusToday==='Present'?'bg-green-600 text-white':'bg-red-500 text-white'}">${s.statusToday==='Present'?'P':'A'}</button></td><td class="p-3 text-right">₹${s.baseSalary}</td><td class="p-3 text-center"><input type="number" value="${adv}" onchange="upStaffAdv('${s.id}', this.value)" class="w-16 bg-amber-50 border rounded px-1 py-0.5 text-center font-bold text-xs outline-none focus:bg-white"></td><td class="p-3 text-right font-black text-emerald-700 bg-emerald-50/50">₹${net}</td><td class="p-3 text-center whitespace-nowrap"><button onclick="paySalary('${s.id}','${s.name}',${net})" class="px-2 py-1 bg-slate-900 text-white rounded text-xs font-bold mr-1">Pay</button><button onclick="rmStf('${s.id}')" class="text-slate-400 hover:text-red-500 font-bold px-1">✕</button></td></tr>`; }); }
         }
 
-        function renderKitchens(kits) {
-            const list = document.getElementById('kitchen-list');
-            const select = document.getElementById('new-item-kit');
-            if(!kits || kits.length === 0) return list.innerHTML = `<p class="text-xs text-slate-500">No kitchens</p>`;
+        document.getElementById('formAddCategory').onsubmit=(e)=>{e.preventDefault();const db=getDB();const val=document.getElementById('inpCatName').value.trim();if(db&&val&&!db.categories.includes(val)){db.categories.push(val);window.Sapna.save(db);e.target.reset();}};
+        document.getElementById('formAddKitchen').onsubmit=(e)=>{e.preventDefault();const db=getDB();const val=document.getElementById('inpKitName').value.trim();if(db&&val){db.kitchens.push({id:'k_'+Date.now().toString(36).substr(-4),name:val,icon:'👨‍🍳'});window.Sapna.save(db);e.target.reset();}};
+        
+        // ⚡ THE BIG SEQUENCE ALGORITHM ⚡
+        document.getElementById('formAddTable').onsubmit = (e) => {
+            e.preventDefault(); const db = getDB(); 
+            if(!db) return;
 
-            list.innerHTML = kits.map(k => `
-                <div class="flex justify-between items-center bg-slate-950 px-3 py-2 rounded-xl border border-slate-800/80">
-                    <span class="font-bold text-xs text-slate-200">${k.icon} ${k.name} <span class="text-[10px] text-slate-500 font-mono">(${k.id})</span></span>
-                    <button onclick="window.Sapna.delKitchen('${k.id}')" class="text-red-400 hover:text-red-300 font-bold text-[11px]">Delete</button>
-                </div>
-            `).join('');
+            const area = document.getElementById('inpTblArea').value.trim();
+            const startStr = document.getElementById('inpTblStart').value.trim();
+            const count = parseInt(document.getElementById('inpTblCount').value);
 
-            if(select) select.innerHTML = kits.map(k => `<option value="${k.id}">${k.name} (${k.icon})</option>`).join('');
-        }
+            if(!area || !startStr || isNaN(count) || count < 1) return;
 
-        function renderMenu(items) {
-            const list = document.getElementById('menu-list');
-            if(!items || items.length === 0) return list.innerHTML = `<p class="text-xs text-slate-500">Menu is empty</p>`;
+            let labels = [];
+            let s = startStr;
 
-            list.innerHTML = items.map(m => `
-                <div class="bg-slate-950 border border-slate-800/80 p-3 rounded-2xl flex justify-between items-center hover:border-slate-700 transition-all">
-                    <div class="overflow-hidden pr-2">
-                        <h3 class="font-bold text-white text-xs truncate">${m.name}</h3>
-                        <p class="text-[10px] text-slate-400 mt-0.5">${m.category}</p>
-                    </div>
-                    <div class="flex items-center gap-2 shrink-0">
-                        <div class="flex items-center bg-slate-900 border border-slate-700 rounded-xl px-2 focus-within:border-amber-400">
-                            <span class="text-[10px] text-slate-500 font-serif">₹</span>
-                            <input type="number" value="${m.price}" onchange="window.Sapna.quickPriceUpdate('${m.id}', this.value)"
-                                class="w-12 bg-transparent text-amber-400 font-black text-xs text-right py-1 outline-none" />
-                        </div>
-                        <button onclick="window.Sapna.delMenu('${m.id}')" class="text-slate-500 hover:text-red-400 p-1 transition-colors" title="Delete">🗑️</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderStaff(staff) {
-            const list = document.getElementById('staff-list');
-            if(!staff || staff.length === 0) return list.innerHTML = `<p class="text-xs text-slate-500">No staff registered</p>`;
-
-            list.innerHTML = staff.map(s => `
-                <div class="bg-slate-950 border border-slate-800 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="font-black text-white text-sm">${s.name}</span>
-                            <button onclick="toggleStaffStatus('${s.id}', '${s.statusToday}')" 
-                                class="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold uppercase transition-all ${s.statusToday === 'Present' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/10 text-red-400 border border-red-500/30'}">
-                                ● ${s.statusToday || 'Present'}
-                            </button>
-                        </div>
-                        <p class="text-[11px] text-slate-400 mt-1">Role: <span class="text-amber-400 font-medium">${s.role}</span> | Base: ₹${s.baseSalary}</p>
-                    </div>
-                    <div class="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end">
-                        <div class="flex items-center bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1">
-                            <span class="text-[10px] text-slate-500 mr-1">Adv: ₹</span>
-                            <input type="number" value="${s.advanceTaken || 0}" onchange="updateStaffAdvance('${s.id}', this.value)"
-                                class="w-14 bg-transparent text-amber-400 font-bold text-xs text-right outline-none" />
-                        </div>
-                        <button onclick="deleteStaffMember('${s.id}')" class="text-slate-600 hover:text-red-400 transition-colors text-sm">🗑️</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // ================= CREATION FORM ACTIONS (Bina page refresh kiye save) =================
-        function createNewCategory(e) {
-            e.preventDefault();
-            const val = document.getElementById('new-cat-name').value.trim();
-            const cache = getCache();
-            if(!val || !cache) return;
-
-            if(!cache.categories.includes(val)) {
-                cache.categories.push(val);
-                window.Sapna.save(cache);
-                document.getElementById('new-cat-name').value = '';
-            } else alert('Category pehle se hai!');
-        }
-
-        function createNewKitchen(e) {
-            e.preventDefault();
-            const idVal = document.getElementById('new-kit-id').value.trim().toLowerCase().replace(/\s+/g, '-');
-            const nameVal = document.getElementById('new-kit-name').value.trim();
-            const iconVal = document.getElementById('new-kit-icon').value.trim() || '🍳';
-            const cache = getCache();
-            if(!cache) return;
-
-            if(!cache.kitchens.some(k => k.id === idVal)) {
-                cache.kitchens.push({ id: idVal, name: nameVal, icon: iconVal });
-                window.Sapna.save(cache);
-                document.getElementById('new-kit-id').value = '';
-                document.getElementById('new-kit-name').value = '';
-            } else alert('Is ID ka kitchen pehle se hai!');
-        }
-
-        function createNewMenuItem(e) {
-            e.preventDefault();
-            const nameVal = document.getElementById('new-item-name').value.trim();
-            const catVal = document.getElementById('new-item-cat').value;
-            const priceVal = parseFloat(document.getElementById('new-item-price').value);
-            const kitVal = document.getElementById('new-item-kit').value;
-            const cache = getCache();
-
-            if(!nameVal || !catVal || isNaN(priceVal) || !cache) return;
-
-            cache.menu.push({
-                id: 'item-' + Date.now(),
-                name: nameVal,
-                category: catVal,
-                price: priceVal,
-                kitchenId: kitVal || 'k1'
-            });
-
-            window.Sapna.save(cache);
-            document.getElementById('new-item-name').value = '';
-            document.getElementById('new-item-price').value = '';
-        }
-
-        function createNewStaff(e) {
-            e.preventDefault();
-            const nameVal = document.getElementById('new-staff-name').value.trim();
-            const roleVal = document.getElementById('new-staff-role').value;
-            const salaryVal = parseFloat(document.getElementById('new-staff-salary').value) || 0;
-            const cache = getCache();
-            if(!nameVal || !cache) return;
-
-            cache.staff.push({
-                id: 'staff-' + Date.now(),
-                name: nameVal,
-                role: roleVal,
-                baseSalary: salaryVal,
-                advanceTaken: 0,
-                statusToday: 'Present'
-            });
-
-            window.Sapna.save(cache);
-            document.getElementById('new-staff-name').value = '';
-            document.getElementById('new-staff-salary').value = '';
-        }
-
-        // STAFF HELPERS
-        function updateStaffAdvance(id, val) {
-            const cache = getCache();
-            const person = cache.staff.find(s => s.id === id);
-            if(person) { person.advanceTaken = parseFloat(val) || 0; window.Sapna.save(cache); }
-        }
-
-        function toggleStaffStatus(id, curr) {
-            const cache = getCache();
-            const person = cache.staff.find(s => s.id === id);
-            if(person) { person.statusToday = curr === 'Present' ? 'Absent' : 'Present'; window.Sapna.save(cache); }
-        }
-
-        async function deleteStaffMember(id) {
-            if(!confirm('Delete this staff record?')) return;
-            const cache = getCache();
-            cache.staff = cache.staff.filter(s => s.id !== id);
-            window.Sapna.save(cache);
-            if(window.Sapna.sb) await window.Sapna.sb.from('staff').delete().eq('id', id);
-        }
-
-        // FALLBACK BOOTSTRAPPER: Agar core engine pehle hi load ho chuka ho
-        setTimeout(() => {
-            if(window.Sapna && window.Sapna.cache && window.Sapna.cache.menu) {
-                window.dispatchEvent(new CustomEvent('SAPNA_STATE_UPDATED', { detail: window.Sapna.cache }));
+            // Scenario A: Pure Number entered (e.g. "8") -> becomes Table 8, Table 9
+            if (/^\d+$/.test(s)) {
+                let startNum = parseInt(s, 10);
+                for(let i=0; i<count; i++) labels.push("Table " + (startNum + i));
+            } else {
+                // Scenario B: Alphanumeric entered (e.g. "A1" or "B-12") -> becomes Table A1, Table A2
+                let match = s.match(/^(.*?)(\d+)$/);
+                if(match) {
+                    let prefix = match[1]; // "A"
+                    let startNum = parseInt(match[2], 10); // 1
+                    for(let i=0; i<count; i++) {
+                        // Ensure "Table " is prefixed properly
+                        let finalPrefix = prefix.toLowerCase().includes("table") ? prefix : "Table " + prefix;
+                        labels.push(finalPrefix + (startNum + i));
+                    }
+                } else {
+                    // Scenario C: Pure text e.g. "CABIN" -> Table CABIN-1
+                    for(let i=1; i<=count; i++) labels.push("Table " + s + "-" + i);
+                }
             }
-        }, 600);
+
+            // Push into DB
+            labels.forEach(lbl => {
+                if(!db.tables.some(t => t.label.toLowerCase() === lbl.toLowerCase())) {
+                    db.tables.push({ id: 'tbl_' + Math.random().toString(36).substr(2,6), area: area, label: lbl, isParcel: false });
+                }
+            });
+
+            window.Sapna.save(db); e.target.reset();
+        };
+
+        document.getElementById('formAddMenu').onsubmit=(e)=>{e.preventDefault();const db=getDB();if(db){db.menu.push({id:'item_'+Date.now(),name:document.getElementById('inpMenuName').value.trim(),category:document.getElementById('inpMenuCat').value,price:parseFloat(document.getElementById('inpMenuPrice').value),kitchenId:document.getElementById('inpMenuKit').value});window.Sapna.save(db);e.target.reset();}};
+        document.getElementById('formAddStaff').onsubmit=(e)=>{e.preventDefault();const db=getDB();if(db){db.staff.push({id:'stf_'+Date.now(),name:document.getElementById('inpStfName').value.trim(),role:document.getElementById('inpStfRole').value,baseSalary:parseFloat(document.getElementById('inpStfSalary').value)||0,advanceTaken:0,statusToday:'Present'});window.Sapna.save(db);e.target.reset();}};
+
+        window.rmCat=async(name)=>{if(confirm("Delete?")){const db=getDB();db.categories=db.categories.filter(x=>x!==name);window.Sapna.save(db);if(window.Sapna.sb)await window.Sapna.sb.from('categories').delete().eq('name',name);refreshViews();}};
+        window.rmKit=async(id)=>{if(confirm("Delete?")){const db=getDB();db.kitchens=db.kitchens.filter(x=>x.id!==id);window.Sapna.save(db);if(window.Sapna.sb)await window.Sapna.sb.from('kitchens').delete().eq('id',id);refreshViews();}};
+        window.rmTbl=async(id)=>{if(confirm("Delete Table?")){const db=getDB();db.tables=db.tables.filter(x=>x.id!==id);window.Sapna.save(db);if(window.Sapna.sb)await window.Sapna.sb.from('tables').delete().eq('id',id);refreshViews();}};
+        window.rmMenu=async(id)=>{if(confirm("Delete?")){const db=getDB();db.menu=db.menu.filter(x=>x.id!==id);window.Sapna.save(db);if(window.Sapna.sb)await window.Sapna.sb.from('menu').delete().eq('id',id);refreshViews();}};
+        window.rmStf=async(id)=>{if(confirm("Permanent Delete?")){const db=getDB();db.staff=db.staff.filter(x=>x.id!==id);window.Sapna.save(db);if(window.Sapna.sb)await window.Sapna.sb.from('staff').delete().eq('id',id);refreshViews();}};
+        window.togHaziri=(id)=>{const db=getDB();let s=db.staff.find(x=>x.id===id);if(s){s.statusToday=s.statusToday==='Present'?'Absent':'Present';window.Sapna.save(db);refreshViews();}};
+        window.upStaffAdv=(id,val)=>{const db=getDB();let s=db.staff.find(x=>x.id===id);if(s){s.advanceTaken=parseFloat(val)||0;window.Sapna.save(db);refreshViews();}};
+        window.paySalary=(id,name,amt)=>{if(confirm(`Pay ₹${amt}?`)){const db=getDB();let s=db.staff.find(x=>x.id===id);if(s){s.advanceTaken=0;window.Sapna.save(db);refreshViews();}}};
+
+        window.addEventListener('SAPNA_STATE_UPDATED', refreshViews); setTimeout(refreshViews, 300); switchTab('DASH');
     </script>
 </body>
 </html>

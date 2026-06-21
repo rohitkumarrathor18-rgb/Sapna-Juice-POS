@@ -5,406 +5,232 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Master POS Counter - Sapna Juice</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase Official Cloud JS SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script src="../sapna-core.js"></script>
-    <!-- Core Engine Import -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../sapna-core.js"></script>
     <style>
-        html, body { 
-            height: 100dvh; width: 100vw; 
-            margin: 0; padding: 0; 
-            overflow: hidden; 
-            background-color: #f8fafc; 
-        }
+        html, body { height: 100dvh; width: 100vw; margin: 0; padding: 0; overflow: hidden; background-color: #f8fafc; }
         button, input, select { touch-action: manipulation; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        
-        /* Thermal Printer Print Code */
         @media print {
             body * { visibility: hidden; }
             #printableTicket, #printableTicket * { visibility: visible; }
-            #printableTicket { position: absolute; left: 0; top: 0; width: 80mm; padding: 10px; font-family: monospace; }
+            #printableTicket { position: absolute; left: 0; top: 0; width: 80mm; padding: 10px; font-family: monospace; color: black; font-size: 12px; }
         }
     </style>
 </head>
 <body class="font-sans text-slate-800 select-none antialiased flex flex-col h-[100dvh]">
 
-    <!-- TOP MASTER HEADER -->
     <header class="bg-slate-900 text-white h-16 flex items-center justify-between px-4 sm:px-6 shadow-md shrink-0 z-30 border-b border-slate-800">
         <div class="flex items-center gap-3">
             <span class="text-2xl hidden sm:inline">🍹</span>
-            <div>
-                <h1 class="text-sm sm:text-lg font-black tracking-wide text-green-400">SAPNA JUICE <span class="text-white font-light">| Front Desk</span></h1>
-                <p class="text-[10px] text-slate-400 uppercase tracking-widest font-mono" id="txtLiveTime">--:--:--</p>
-            </div>
+            <div><h1 class="text-sm sm:text-lg font-black tracking-wide text-green-400">SAPNA JUICE <span class="text-white font-light">| Front Desk</span></h1><p class="text-[10px] text-slate-400 uppercase tracking-widest font-mono" id="txtLiveTime">--:--:--</p></div>
         </div>
 
-        <!-- ACTION TRIGGERS -->
-        <div class="flex items-center gap-2.5 overflow-x-auto shrink-0">
-            
-            <button onclick="openZomatoIncoming()" class="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-black shadow-lg flex items-center gap-1.5 animate-pulse active:scale-95 transition whitespace-nowrap">
-                <span>🛵</span> <span class="hidden sm:inline">Simulate</span> Zomato API
-            </button>
-
-            <!-- CONTRAST FIXED: Lak-lak Amber background with solid Black bold text -->
-            <button onclick="selectCounterTbl('TBL_PARCEL', '📦 TAKEAWAY PARCEL')" class="bg-amber-400 hover:bg-amber-300 text-black font-black px-4 py-1.5 sm:py-2 rounded-xl text-xs uppercase tracking-wider shadow-md transition flex items-center gap-1.5 active:scale-95 whitespace-nowrap">
-                <span>🛍️</span> Quick Takeaway
-            </button>
+        <div class="flex items-center gap-2.5 overflow-x-auto shrink-0 pr-1">
+            <button onclick="openZomatoIncoming()" class="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 text-white px-3 py-1.5 rounded-xl text-xs font-black shadow-lg flex items-center gap-1.5 animate-pulse"><span>🛵</span> <span class="hidden sm:inline">Simulate</span> Zomato</button>
+            <button onclick="selectCounterTbl('tbl_parcel', '📦 TAKEAWAY PARCEL')" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-1.5 rounded-xl text-xs uppercase tracking-wider shadow-md flex items-center gap-1.5"><span>🛍️</span> Quick Takeaway</button>
         </div>
     </header>
 
-    <!-- MASTER LIQUID BODY -->
     <div class="flex-1 flex flex-row overflow-hidden relative w-full">
 
-        <!-- ========================================================= -->
-        <!-- LEFT: FLOOR MATRIX -->
-        <!-- ========================================================= -->
+        <!-- LEFT FLOOR -->
         <div id="view_Floor" class="flex-1 flex flex-col h-full bg-slate-100 overflow-hidden transition-all z-10">
-            
-            <div class="p-4 bg-white border-b border-slate-200 flex justify-between items-center shrink-0 shadow-2xs">
+            <div class="p-4 bg-white border-b border-slate-200 flex justify-between items-center shrink-0 shadow-2xs z-20">
                 <h2 class="text-xs sm:text-sm font-black text-slate-700 uppercase tracking-wider">Live Floor Overview</h2>
-                
-                <!-- Status Legend -->
-                <div class="flex gap-2 sm:gap-3 text-[10px] sm:text-xs font-bold text-slate-500 overflow-x-auto">
-                    <span class="flex items-center gap-1 whitespace-nowrap"><span class="w-2.5 h-2.5 bg-white border border-slate-300 rounded-full"></span> Vacant</span>
-                    <span class="flex items-center gap-1 whitespace-nowrap"><span class="w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse"></span> Cooking</span>
-                    <span class="flex items-center gap-1 whitespace-nowrap"><span class="w-2.5 h-2.5 bg-emerald-600 rounded-full"></span> Ready</span>
-                    <span class="flex items-center gap-1 whitespace-nowrap"><span class="w-2.5 h-2.5 bg-cyan-500 rounded-full"></span> Served</span>
+                <div class="flex gap-2 text-[10px] sm:text-xs font-bold text-slate-500 pr-1">
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-white border rounded-full"></span> Vacant</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse"></span> Cooking</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-emerald-600 rounded-full"></span> Ready</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-cyan-500 rounded-full"></span> Served</span>
                 </div>
             </div>
 
-            <!-- TABLE GRID -->
-            <div class="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100">
-                <div id="floorGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-4"></div>
+            <!-- ⚡ SUPER NORMALIZING SEARCH BAR ⚡ -->
+            <div class="bg-emerald-50 border-b border-emerald-100 p-3 shrink-0 flex items-center gap-3 shadow-inner z-10">
+                <span class="text-lg">🔍</span>
+                <form onsubmit="searchTable(event)" class="flex flex-1 gap-2 max-w-md">
+                    <select id="searchZone" class="bg-white border rounded-lg px-2 py-1.5 text-xs font-bold outline-none focus:border-emerald-500 w-1/3 text-emerald-900"></select>
+                    <!-- User can type "a1", "8", "Table 8", "t8" -->
+                    <input type="text" id="searchTblLabel" required placeholder="Table # (e.g. A1 or 8)" class="flex-1 bg-white border rounded-lg px-3 py-1.5 text-xs font-bold outline-none focus:border-emerald-500 uppercase text-emerald-900 shadow-2xs">
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-5 py-1.5 rounded-lg text-xs uppercase shadow-md active:scale-95">Open</button>
+                </form>
             </div>
+
+            <div id="floorZonesContainer" class="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100 space-y-6 relative"></div>
         </div>
 
-        <!-- ========================================================= -->
-        <!-- RIGHT: BILLING & SETTLEMENT DRAWER -->
-        <!-- ========================================================= -->
-        <div id="view_Billing" class="absolute inset-0 lg:static lg:w-[420px] xl:w-[460px] bg-white flex flex-col h-full shadow-2xl z-20 transition-transform duration-300 translate-x-full lg:translate-x-0 shrink-0 border-l border-slate-200">
-            
-            <!-- DRAWER HEADER -->
+        <!-- RIGHT BILLING -->
+        <div id="view_Billing" class="absolute inset-0 lg:static lg:w-[440px] xl:w-[480px] bg-white flex flex-col h-full shadow-2xl z-20 transition-transform duration-300 translate-x-full lg:translate-x-0 shrink-0 border-l border-slate-200">
             <div class="p-4 bg-slate-900 text-white flex justify-between items-center shrink-0 border-b border-slate-800">
                 <div class="flex items-center gap-2 min-w-0">
-                    <button onclick="closeCounterBilling()" class="lg:hidden w-8 h-8 bg-slate-800 hover:bg-slate-700 rounded-full font-bold text-xs shrink-0">←</button>
-                    <div class="truncate">
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Active Khata</span>
-                        <h2 class="text-base sm:text-xl font-black text-amber-400 truncate" id="lblSelectedTable">Select Table</h2>
-                    </div>
+                    <button onclick="closeCounterBilling()" class="lg:hidden w-8 h-8 bg-slate-800 rounded-full font-bold text-xs">←</button>
+                    <div class="truncate"><span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Active Khata</span><h2 class="text-base sm:text-xl font-black text-amber-400 truncate" id="lblSelectedTable">Select Table</h2></div>
                 </div>
                 <span class="text-xs bg-slate-800 text-green-400 font-mono font-black px-2.5 py-1 rounded border border-slate-700 shrink-0" id="lblBadgeCount">0 Items</span>
             </div>
 
-            <!-- PUNCHED ITEMS LIST -->
-            <div id="listBilledItems" class="flex-1 overflow-y-auto p-4 space-y-2.5 bg-slate-50/70">
-                <div class="h-full flex flex-col items-center justify-center text-slate-300">
-                    <span class="text-6xl mb-2 opacity-60">👈</span>
-                    <p class="text-xs font-bold text-slate-400">Left side se koi table select kijiye</p>
-                </div>
+            <div id="stripCustomer" class="px-4 py-2 bg-slate-100 border-b border-slate-200 flex gap-2 shrink-0 hidden">
+                <input type="text" id="billCustPhone" placeholder="Customer Phone (Opt)..." class="w-1/2 bg-white border rounded-lg px-2.5 py-1 text-xs font-bold outline-none focus:border-emerald-600">
+                <input type="text" id="billCustName" placeholder="Customer Name (Opt)..." class="w-1/2 bg-white border rounded-lg px-2.5 py-1 text-xs font-bold outline-none focus:border-emerald-600">
             </div>
 
-            <!-- EXTRA PUNCH SECTION (Menu Buttons OR Custom Item Form) -->
-            <div id="boxCounterPunch" class="p-3 bg-slate-100 border-t border-slate-200 shrink-0 hidden">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-[10px] font-black text-slate-500 uppercase tracking-wider block">⚡ Quick Counter Punch:</span>
-                    <button onclick="toggleCustomForm()" id="btnToggleCustom" class="text-xs font-black text-indigo-700 bg-white border border-indigo-200 px-2.5 py-0.5 rounded-md hover:bg-indigo-50 shadow-2xs transition">➕ Custom Item</button>
-                </div>
+            <div id="listBilledItems" class="flex-1 overflow-y-auto p-4 space-y-2.5 bg-slate-50/70">
+                <div class="h-full flex flex-col items-center justify-center text-slate-300"><span class="text-6xl mb-2 opacity-60">👈</span><p class="text-xs font-bold text-slate-400">Left side se table select kijiye</p></div>
+            </div>
 
-                <!-- Normal Catalog Buttons -->
-                <div id="gridQuickMenu" class="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-1 block"></div>
-
-                <!-- Custom Ad-hoc Item Form (Hidden by default) -->
-                <form id="formCustomItem" onsubmit="punchCustomItem(event)" class="space-y-2 hidden pt-1">
-                    <div class="flex gap-1.5">
-                        <input type="text" id="custName" required placeholder="Custom Item Name" class="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-bold outline-none focus:border-indigo-600">
-                        <input type="number" id="custQty" required min="1" value="1" placeholder="Qty" class="w-14 bg-white border border-slate-300 rounded-lg px-1.5 py-1.5 text-xs font-bold text-center outline-none focus:border-indigo-600">
-                        <input type="number" id="custPrice" required min="0" placeholder="Price ₹" class="w-20 bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-bold outline-none focus:border-indigo-600">
-                    </div>
-                    <div class="flex gap-1.5 items-center">
-                        <select id="custKit" class="flex-1 bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-bold outline-none">
-                            <option value="KITCHEN_BAR">🍹 Juice & Shakes Bar</option>
-                            <option value="KITCHEN_FOOD">🍔 Fast Food Kitchen</option>
-                        </select>
-                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-5 py-1.5 rounded-lg text-xs uppercase tracking-wider shadow">Add to Bill ✓</button>
-                    </div>
+            <!-- COUNTER CATALOG -->
+            <div id="boxCounterPunch" class="p-3 bg-slate-100 border-t border-slate-200 shrink-0 hidden flex flex-col">
+                <div class="flex justify-between items-center mb-2"><span class="text-[10px] font-black text-slate-500 uppercase tracking-wider block">⚡ Live Catalog:</span><button onclick="toggleCustomForm()" id="btnToggleCustom" class="text-xs font-black text-indigo-700 bg-white border px-2.5 py-0.5 rounded-md hover:bg-indigo-50">➕ Custom Item</button></div>
+                <div id="catPillsStrip" class="flex gap-1 overflow-x-auto pb-2 mb-2 border-b shrink-0"><button onclick="filterCatalog('ALL')" class="cat-pill bg-slate-900 text-white font-black text-[11px] px-3 py-1 rounded-lg">All</button></div>
+                <div id="gridQuickMenu" class="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-1"></div>
+                
+                <form id="formCustomItem" onsubmit="punchCustomItem(event)" class="space-y-2 pt-1 hidden">
+                    <div class="flex gap-1.5"><input type="text" id="custName" required placeholder="Item Name" class="flex-1 bg-white border rounded-lg px-3 py-1.5 text-xs font-bold outline-none"><input type="number" id="custQty" required min="1" value="1" placeholder="Qty" class="w-14 bg-white border rounded-lg px-1.5 py-1.5 text-xs font-bold text-center outline-none"><input type="number" id="custPrice" required min="0" placeholder="Price ₹" class="w-20 bg-white border rounded-lg px-2 py-1.5 text-xs font-bold outline-none text-right"></div>
+                    <div class="flex gap-1.5 items-center"><select id="custKit" class="flex-1 bg-white border rounded-lg px-2 py-1.5 text-xs font-bold outline-none"></select><button type="submit" class="bg-indigo-600 text-white font-black px-5 py-1.5 rounded-lg text-xs uppercase shadow">Add ✓</button></div>
                 </form>
             </div>
 
-            <!-- FINANCIAL SETTLEMENT FOOTER -->
-            <div class="p-4 bg-white border-t border-slate-200 shadow-2xl shrink-0">
-                <div class="flex justify-between text-xs font-bold text-slate-500 mb-1">
-                    <span>Subtotal</span>
-                    <span id="txtSub">₹0</span>
-                </div>
-                <div class="flex justify-between text-xs font-bold text-slate-400 mb-2 pb-2 border-b border-slate-100">
-                    <span>CGST + SGST (5%)</span>
-                    <span id="txtGst">₹0</span>
-                </div>
-                <div class="flex justify-between items-baseline mb-3">
-                    <span class="text-sm font-black text-slate-900 uppercase tracking-wider">Total Payable</span>
-                    <span id="txtGrand" class="text-2xl font-black text-emerald-600">₹0</span>
-                </div>
+            <!-- FOOTER MATH -->
+            <div class="p-4 bg-white border-t shadow-2xl shrink-0 space-y-1.5">
+                <div class="flex justify-between text-xs font-bold text-slate-500"><span>Items Subtotal</span> <span id="txtSub">₹0</span></div>
+                <div class="flex justify-between items-center text-xs font-bold text-slate-600"><span>(+) Packing Charge ₹</span> <input type="number" id="inpPacking" value="0" min="0" onchange="renderBillingList()" class="w-14 bg-slate-100 border rounded px-1.5 py-0.5 text-right font-black text-xs outline-none"></div>
+                <div class="flex justify-between items-center text-xs font-bold text-red-600 border-b pb-1.5"><span>(-) Extra Shop Discount ₹</span> <input type="number" id="inpDiscount" value="0" min="0" onchange="renderBillingList()" class="w-14 bg-red-50 border text-red-700 rounded px-1.5 py-0.5 text-right font-black text-xs outline-none"></div>
+                <div class="flex justify-between text-xs font-bold text-slate-400 pt-0.5"><span>CGST + SGST (5%)</span> <span id="txtGst">₹0</span></div>
+                <div class="flex justify-between items-baseline pb-1"><span class="text-sm font-black text-slate-900 uppercase tracking-wider">Net Payable</span><span id="txtGrand" class="text-2xl font-black text-emerald-600">₹0</span></div>
 
-                <!-- 3 MASTER SETTLEMENT BUTTONS -->
-                <div class="grid grid-cols-3 gap-2">
-                    <button onclick="printThermalBill()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-black py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 flex flex-col items-center justify-center border border-slate-300">
-                        <span class="text-sm">🖨️</span> Print
-                    </button>
-                    
-                    <!-- DYNAMIC UPI QR TRIGGER -->
-                    <button onclick="openUpiModal()" class="bg-purple-50 hover:bg-purple-100 text-purple-700 font-black py-2.5 rounded-xl text-xs uppercase tracking-wider transition active:scale-95 flex flex-col items-center justify-center border border-purple-300 shadow-2xs">
-                        <span class="text-sm">📱</span> UPI QR
-                    </button>
-
-                    <button onclick="settleCurrentKhata()" id="btnSettle" disabled class="bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-200 disabled:text-slate-400 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-md transition active:scale-95 flex flex-col items-center justify-center">
-                        <span class="text-sm">✓</span> Settle
-                    </button>
+                <div class="grid grid-cols-3 gap-2 pt-1">
+                    <button onclick="printThermalBill()" class="bg-slate-100 hover:bg-slate-200 font-black py-2.5 rounded-xl text-xs uppercase border flex justify-center items-center">🖨️ Print</button>
+                    <button onclick="openUpiModal()" class="bg-purple-50 hover:bg-purple-100 text-purple-700 font-black py-2.5 rounded-xl text-xs uppercase border border-purple-300 flex justify-center items-center">📱 QR</button>
+                    <button onclick="settleCurrentKhata()" id="btnSettle" disabled class="bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-200 disabled:text-slate-400 text-white font-black py-2.5 rounded-xl text-xs uppercase shadow-md flex justify-center items-center">✓ Settle</button>
                 </div>
             </div>
-
         </div>
 
     </div>
 
-    <!-- ========================================================= -->
-    <!-- DYNAMIC UPI QR PAYMENT MODAL -->
-    <!-- ========================================================= -->
-    <div id="modalUpi" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex-col items-center justify-center p-4 backdrop-blur-xs">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center relative overflow-hidden animate-scale-up">
-            <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-3">
-                <span class="font-black text-xs text-purple-700 uppercase tracking-wider flex items-center gap-1"><span>⚡</span> Instant UPI Collection</span>
-                <button onclick="closeUpiModal()" class="w-7 h-7 bg-slate-100 hover:bg-slate-200 rounded-full font-black text-xs text-slate-500 transition">✕</button>
-            </div>
-            
-            <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Scan & Pay Exact Amount</p>
-            <h2 class="text-4xl font-black text-slate-900 mt-0.5 mb-3" id="txtUpiGrandTotal">₹0</h2>
-
-            <!-- QR CODE BOX -->
-            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex justify-center items-center mb-3 min-h-[220px]">
-                <img id="imgUpiQr" src="" alt="Live UPI QR" class="w-48 h-48 object-contain">
-            </div>
-
-            <div class="p-2 bg-purple-50 rounded-xl border border-purple-100 text-purple-900 text-[11px] font-bold mb-4 flex items-center justify-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
-                <span>Merchant: Sapna Juice (sapnajuice@paytm)</span>
-            </div>
-
-            <button onclick="settleFromUpi()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg transition active:scale-95">
-                Mark Received & Clear Table ✓
-            </button>
+    <!-- DIGITAL PAID RECEIPT MODAL -->
+    <div id="modalPaidReceipt" class="fixed inset-0 bg-slate-950/85 z-50 hidden flex-col items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-slate-900 relative overflow-hidden flex flex-col max-h-[90dvh]">
+            <div class="text-center pb-4 border-b border-slate-200"><div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2 text-3xl font-black">✓</div><span class="bg-emerald-600 text-white font-black text-[10px] px-3 py-0.5 rounded-full uppercase tracking-widest">Bill Settled</span><h2 class="text-2xl font-black text-slate-900 mt-1.5" id="recTblName">Table</h2><p class="text-xs text-slate-400 font-mono mt-0.5" id="recDate">Date...</p></div>
+            <div class="flex-1 overflow-y-auto py-4 space-y-2 text-xs font-mono border-b"><div class="flex justify-between font-bold text-slate-400 text-[10px] uppercase border-b pb-1"><span>Qty x Item</span><span>Total</span></div><div id="recItemsList" class="space-y-1.5 text-slate-700 font-bold"></div></div>
+            <div class="py-3 space-y-1 text-xs font-mono"><div class="flex justify-between text-slate-500"><span>Subtotal:</span><span id="recSub">₹0</span></div><div class="flex justify-between text-slate-500"><span>Packing:</span><span id="recPack">₹0</span></div><div class="flex justify-between text-red-600 font-bold"><span>Discount:</span><span id="recDisc">-₹0</span></div><div class="flex justify-between text-slate-500"><span>GST (5%):</span><span id="recGst">₹0</span></div><div class="flex justify-between text-base font-black text-emerald-700 pt-2 border-t"><span>PAID TOTAL:</span><span id="recTotal">₹0</span></div></div>
+            <button onclick="finishSettlementModal()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-black py-3.5 rounded-xl text-xs uppercase tracking-widest mt-2 shadow-lg active:scale-95 transition">Done ✓</button>
         </div>
     </div>
 
-    <!-- FAKE ZOMATO INCOMING ORDER MODAL -->
-    <div id="modalZomatoIncoming" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex-col items-center justify-center p-4 backdrop-blur-xs">
-        <div class="bg-slate-900 border-2 border-orange-500 text-white w-full max-w-md rounded-3xl p-6 shadow-2xl relative">
-            <div class="flex items-center gap-3 border-b border-slate-800 pb-4 mb-4">
-                <span class="text-4xl bg-orange-500/20 p-2 rounded-2xl border border-orange-500/30">🛵</span>
-                <div>
-                    <span class="bg-orange-500 text-slate-950 text-[9px] font-black px-2 py-0.5 rounded uppercase">Zomato Instant Delivery</span>
-                    <h3 class="text-lg font-black text-white mt-0.5">Incoming Order #ZM-8419</h3>
-                    <p class="text-xs text-emerald-400 font-bold">Paid via UPI Online • ₹240</p>
-                </div>
-            </div>
-            <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 mb-6 space-y-2 text-xs font-bold">
-                <div class="flex justify-between text-slate-300"><span>2x Special Sapna Cocktail Juice</span> <span>₹180</span></div>
-                <div class="flex justify-between text-slate-300"><span>1x Cheese Corn Nugget</span> <span>₹60</span></div>
-            </div>
-            <div class="flex gap-3">
-                <button onclick="closeZomatoIncoming()" class="flex-1 bg-slate-800 hover:bg-red-600 text-slate-300 font-black py-3.5 rounded-xl text-xs uppercase">Reject</button>
-                <button onclick="acceptZomatoOrder()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3.5 rounded-xl text-xs uppercase shadow-lg">Accept Order 🔥</button>
-            </div>
-        </div>
+    <!-- UPI Modal -->
+    <div id="modalUpi" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex-col items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center relative overflow-hidden"><div class="flex justify-between items-center pb-3 border-b mb-3"><span class="font-black text-xs text-purple-700 uppercase">⚡ UPI Collection</span><button onclick="closeUpiModal()" class="w-7 h-7 bg-slate-100 hover:bg-slate-200 rounded-full font-black text-xs text-slate-500">✕</button></div><p class="text-xs text-slate-400 font-bold uppercase">Scan exact payable</p><h2 class="text-4xl font-black text-slate-900 mt-0.5 mb-3" id="txtUpiGrandTotal">₹0</h2><div class="bg-slate-50 p-4 rounded-2xl border flex justify-center items-center mb-3 min-h-[220px]"><img id="imgUpiQr" src="" class="w-48 h-48 object-contain"></div><button onclick="settleFromUpi()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3.5 rounded-xl text-xs uppercase shadow-lg">Mark Received ✓</button></div>
     </div>
 
-    <!-- HIDDEN THERMAL PRINT TEMPLATE -->
-    <div id="printableTicket" class="hidden">
-        <div style="text-align: center; border-bottom: 1px dashed black; padding-bottom: 5px; margin-bottom: 5px;">
-            <b style="font-size: 16px;">SAPNA JUICE & RESTAURANT</b><br>
-            <small>Mandsaur (M.P.)</small><br><small id="prnTime">Time: --</small>
-        </div>
-        <div style="margin-bottom: 5px;"><b id="prnTable">Table: --</b></div>
-        <div id="prnItems" style="border-bottom: 1px dashed black; padding-bottom: 5px; margin-bottom: 5px;"></div>
-        <div style="text-align: right;"><b>TOTAL: <span id="prnAmt">₹0</span></b></div>
-        <div style="text-align: center; margin-top: 10px; font-size: 10px;">Thank you! Visit Again.</div>
-    </div>
+    <!-- Zomato Modal -->
+    <div id="modalZomatoIncoming" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex-col items-center justify-center p-4"><div class="bg-slate-900 border-2 border-orange-500 text-white w-full max-w-md rounded-3xl p-6 shadow-2xl relative"><div class="flex items-center gap-3 border-b border-slate-800 pb-4 mb-4"><span class="text-4xl bg-orange-500/20 p-2 rounded-2xl border border-orange-500/30">🛵</span><div><span class="bg-orange-500 text-slate-950 text-[9px] font-black px-2 py-0.5 rounded uppercase">Zomato Instant Delivery</span><h3 class="text-lg font-black text-white mt-0.5">Incoming Order #ZM-8419</h3><p class="text-xs text-emerald-400 font-bold">Paid via UPI Online • ₹240</p></div></div><div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 mb-6 space-y-2 text-xs font-bold"><div class="flex justify-between text-slate-300"><span>2x Special Sapna Cocktail Juice</span> <span>₹180</span></div><div class="flex justify-between text-slate-300"><span>1x Cheese Corn Nugget</span> <span>₹60</span></div></div><div class="flex gap-3"><button onclick="closeZomatoIncoming()" class="flex-1 bg-slate-800 hover:bg-red-600 text-slate-300 font-black py-3.5 rounded-xl text-xs uppercase">Reject</button><button onclick="acceptZomatoOrder()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3.5 rounded-xl text-xs uppercase shadow-lg">Accept Order 🔥</button></div></div></div>
+
+    <!-- Thermal Hidden Template -->
+    <div id="printableTicket" class="hidden"><div style="text-align: center; border-bottom: 1px dashed black; padding-bottom: 5px; margin-bottom: 5px;"><b style="font-size: 16px;">SAPNA JUICE & RESTAURANT</b><br><small>Mandsaur (M.P.)</small><br><small id="prnTime">Time: --</small></div><div style="margin-bottom: 5px;"><b id="prnTable">Table: --</b></div><div id="prnItems" style="border-bottom: 1px dashed black; padding-bottom: 5px; margin-bottom: 5px;"></div><div style="text-align: right;"><b>TOTAL: <span id="prnAmt">₹0</span></b></div><div style="text-align: center; margin-top: 10px; font-size: 10px;">Thank you! Visit Again.</div></div>
 
     <script>
-        let ACTIVE_TBL = null;
-        let LIVE_GRAND_TOTAL = 0; // Stored globally for UPI generator
-
+        let ACTIVE_TBL = null; let LIVE_GRAND_TOTAL = 0; let SELECTED_CAT = 'ALL';
         setInterval(() => { document.getElementById('txtLiveTime').innerText = new Date().toLocaleTimeString(); }, 1000);
 
         function updateMobileLayout() {
-            const vFloor = document.getElementById('view_Floor'); const vBill = document.getElementById('view_Billing');
-            if(window.innerWidth >= 1024) { vFloor.classList.remove('hidden'); vBill.classList.remove('translate-x-full'); } 
-            else { if(ACTIVE_TBL) { vFloor.classList.add('hidden'); vBill.classList.remove('translate-x-full'); } else { vFloor.classList.remove('hidden'); vBill.classList.add('translate-x-full'); } }
+            const vFloor=document.getElementById('view_Floor'); const vBill=document.getElementById('view_Billing');
+            if(window.innerWidth>=1024) { vFloor.classList.remove('hidden'); vBill.classList.remove('translate-x-full'); } 
+            else { if(ACTIVE_TBL){ vFloor.classList.add('hidden'); vBill.classList.remove('translate-x-full'); } else { vFloor.classList.remove('hidden'); vBill.classList.add('translate-x-full'); } }
         }
         window.addEventListener('resize', updateMobileLayout);
 
-        // ========================================================
-        // 1. RENDER FLOOR MATRIX (With "Served" Priority)
-        // ========================================================
         function renderFloor() {
-            const db = Sapna.get();
-            const grid = document.getElementById('floorGrid'); grid.innerHTML = '';
+            const db=Sapna.get(); const container=document.getElementById('floorZonesContainer'); const searchZone=document.getElementById('searchZone'); container.innerHTML='';
+            if(!db.tables||db.tables.length===0){ if(searchZone)searchZone.innerHTML=`<option value="ALL">All Zones</option>`; return; }
 
-            if(!db.tables || db.tables.length === 0) return;
+            const zones={}; db.tables.forEach(t=>{const z=(t.area||'Hall').toUpperCase();if(!zones[z])zones[z]=[];zones[z].push(t);});
+            let zoneOptions=`<option value="ALL">All Zones</option>`;
 
-            db.tables.forEach(t => {
-                const liveOrder = db.activeOrders.find(o => o.tableId === t.id);
-                let stStyle = "bg-white border-slate-200 text-slate-800 shadow-2xs hover:border-slate-400";
-                let badge = `<span class="text-[10px] text-slate-400 font-bold">Vacant</span>`;
-                let money = '';
+            Object.keys(zones).forEach(zoneName => {
+                zoneOptions += `<option value="${zoneName}">${zoneName}</option>`; let zoneGridHtml='';
+                zones[zoneName].forEach(t => {
+                    const liveOrder = db.activeOrders.find(o => o.tableId === t.id);
+                    let stStyle = "bg-white border-slate-200 text-slate-800 shadow-2xs hover:border-slate-400";
+                    let badge = `<span class="text-[10px] text-slate-400 font-bold">Vacant</span>`; let money = '';
 
-                if(liveOrder && liveOrder.items.length > 0) {
-                    const orderTotal = liveOrder.items.reduce((s, i) => s + i.price, 0);
-                    money = `<span class="text-xs sm:text-sm font-black text-slate-900">₹${orderTotal}</span>`;
+                    if(liveOrder && liveOrder.items.length > 0) {
+                        const orderTotal = liveOrder.items.reduce((s, i) => s + i.price, 0); money = `<span class="text-xs sm:text-sm font-black text-slate-900">₹${orderTotal}</span>`;
+                        const isCooking=liveOrder.items.some(i=>i.status==='COOKING'); const hasReady=liveOrder.items.some(i=>i.status==='READY'); const isAllServed=liveOrder.items.every(i=>i.status==='SERVED');
 
-                    const isCooking = liveOrder.items.some(i => i.status === 'COOKING');
-                    const hasReady = liveOrder.items.some(i => i.status === 'READY');
-                    const isAllServed = liveOrder.items.every(i => i.status === 'SERVED');
-                    const isAllReadyOrServed = liveOrder.items.every(i => i.status === 'READY' || i.status === 'SERVED') && hasReady;
-
-                    if(isAllServed) {
-                        stStyle = "bg-cyan-50 border-cyan-400 text-cyan-950 shadow-sm";
-                        badge = `<span class="text-[9px] bg-cyan-600 text-white font-black px-2 py-0.5 rounded uppercase">🍽️ SERVED ✓</span>`;
-                    } else if(isAllReadyOrServed) {
-                        stStyle = "bg-emerald-50 border-emerald-500 text-emerald-950 shadow-md ring-2 ring-emerald-400/50";
-                        badge = `<span class="text-[9px] bg-emerald-600 text-white font-black px-2 py-0.5 rounded uppercase">🥤 READY TO SERVE</span>`;
-                    } else if(isCooking) {
-                        stStyle = "bg-amber-50 border-amber-400 text-amber-950 shadow-md";
-                        badge = `<span class="text-[9px] bg-amber-500 text-white font-black px-2 py-0.5 rounded uppercase animate-pulse">👨‍🍳 Cooking</span>`;
-                    } else {
-                        stStyle = "bg-blue-50 border-blue-300 text-blue-950 shadow-sm";
-                        badge = `<span class="text-[9px] bg-blue-600 text-white font-black px-2 py-0.5 rounded uppercase">Kitchen Sent</span>`;
+                        if(isAllServed){stStyle="bg-cyan-50 border-cyan-400 text-cyan-950 shadow-sm";badge=`<span class="text-[9px] bg-cyan-600 text-white font-black px-1.5 py-0.5 rounded uppercase">🍽️ Served</span>`;} 
+                        else if(hasReady){stStyle="bg-emerald-50 border-emerald-500 text-emerald-950 shadow-md ring-2 ring-emerald-400/50";badge=`<span class="text-[9px] bg-emerald-600 text-white font-black px-1.5 py-0.5 rounded uppercase">🥤 Ready</span>`;} 
+                        else if(isCooking){stStyle="bg-amber-50 border-amber-400 text-amber-950 shadow-md";badge=`<span class="text-[9px] bg-amber-500 text-white font-black px-1.5 py-0.5 rounded uppercase animate-pulse">👨‍🍳 Cooking</span>`;} 
+                        else {stStyle="bg-blue-50 border-blue-300 text-blue-950 shadow-sm";badge=`<span class="text-[9px] bg-blue-600 text-white font-black px-1.5 py-0.5 rounded uppercase">Sent</span>`;}
                     }
-                }
+                    if(t.isParcel) stStyle += " bg-slate-900 border-slate-800 text-white hover:border-amber-400";
 
-                if(t.isParcel) stStyle += " col-span-full bg-slate-900 border-slate-800 text-white hover:border-amber-400";
-
-                grid.innerHTML += `
-                    <div onclick="selectCounterTbl('${t.id}', '${t.label}')" class="p-3.5 sm:p-4 rounded-2xl border-2 flex flex-col justify-between h-24 sm:h-28 transition active:scale-95 cursor-pointer relative overflow-hidden ${stStyle}">
-                        <div class="flex justify-between items-start gap-1"><h3 class="font-black text-xs sm:text-base leading-tight truncate">${t.label}</h3>${badge}</div>
-                        <div class="flex justify-between items-end mt-auto pt-1"><span class="text-[10px] opacity-60 font-bold">${liveOrder ? liveOrder.items.length + ' units' : ''}</span>${money}</div>
-                    </div>
-                `;
+                    zoneGridHtml += `<div onclick="selectCounterTbl('${t.id}', '${t.label}')" class="p-3.5 sm:p-4 rounded-2xl border-2 flex flex-col justify-between h-24 sm:h-28 transition active:scale-95 cursor-pointer relative overflow-hidden ${stStyle}"><div class="flex justify-between items-start gap-1"><h3 class="font-black text-xs sm:text-base leading-tight truncate">${t.label}</h3>${badge}</div><div class="flex justify-between items-end mt-auto pt-1"><span class="text-[10px] opacity-60 font-bold">${liveOrder?liveOrder.items.length+' units':''}</span>${money}</div></div>`;
+                });
+                container.innerHTML += `<div class="space-y-3"><div class="flex items-center gap-2 pb-1 border-b"><span class="font-black text-xs text-slate-400 font-mono uppercase tracking-widest block">🪑 Zone:</span><h3 class="text-sm font-black text-slate-800 uppercase tracking-wider">${zoneName}</h3></div><div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-4">${zoneGridHtml}</div></div>`;
             });
+
+            if(searchZone) searchZone.innerHTML = zoneOptions;
+            const custK=document.getElementById('custKit'); if(custK&&db.kitchens) custK.innerHTML=db.kitchens.map(k=>`<option value="${k.id}">${k.name}</option>`).join('');
         }
 
-        window.selectCounterTbl = (id, label) => {
-            ACTIVE_TBL = { id, label };
-            document.getElementById('lblSelectedTable').innerText = label;
-            document.getElementById('boxCounterPunch').classList.remove('hidden');
-            renderBillingList(); renderQuickCounterMenu(); updateMobileLayout();
+        // ⚡ THE BULLETPROOF NORMALIZING SEARCH HELPER ⚡
+        window.searchTable = (e) => {
+            e.preventDefault(); const db=Sapna.get(); if(!db||!db.tables) return;
+            const zone = document.getElementById('searchZone').value;
+            const rawQuery = document.getElementById('searchTblLabel').value.trim();
+            if(!rawQuery) return;
+
+            // Strips "Table ", "T-", "t" from both user input and DB name to find the pure raw ID
+            function coreID(str) { return str.toUpperCase().replace(/^TABLE\s*/, '').replace(/^T\-?/, '').trim(); }
+            const queryCore = coreID(rawQuery);
+
+            let foundTbl = db.tables.find(t => {
+                const isMatch = (coreID(t.label) === queryCore) || (t.label.toUpperCase() === rawQuery.toUpperCase());
+                if(zone === 'ALL') return isMatch;
+                return ((t.area || 'Hall').toUpperCase() === zone) && isMatch;
+            });
+
+            if(foundTbl) { selectCounterTbl(foundTbl.id, foundTbl.label); document.getElementById('searchTblLabel').value = ''; } 
+            else { alert(`❌ Dukan me '${rawQuery}' naam ki koi table ${zone === 'ALL' ? 'kisi bhi zone me' : zone + ' me'} nahi mili!`); }
         };
 
-        window.closeCounterBilling = () => { ACTIVE_TBL = null; updateMobileLayout(); };
+        window.selectCounterTbl=(id,label)=>{ACTIVE_TBL={id,label};document.getElementById('lblSelectedTable').innerText=label;document.getElementById('boxCounterPunch').classList.remove('hidden');document.getElementById('stripCustomer').classList.remove('hidden');renderBillingList();renderCategoryStrip();filterCatalog('ALL');updateMobileLayout();};
+        window.closeCounterBilling=()=>{ACTIVE_TBL=null;updateMobileLayout();};
 
-        // ========================================================
-        // 2. RENDER DRAWER ITEMS (With "🤲 Serve" Button)
-        // ========================================================
+        function renderCategoryStrip(){const strip=document.getElementById('catPillsStrip');const db=Sapna.get();if(!strip||!db.categories)return;strip.innerHTML=`<button onclick="filterCatalog('ALL')" id="cp_ALL" class="cat-pill bg-slate-900 text-white font-black text-[11px] px-3 py-1 rounded-lg">All</button>`;db.categories.forEach(c=>{strip.innerHTML+=`<button onclick="filterCatalog('${c}')" id="cp_${c.replace(/\s+/g,'_')}" class="cat-pill bg-white hover:bg-slate-50 text-slate-600 font-bold text-[11px] px-3 py-1 rounded-lg border">${c}</button>`;});}
+        window.filterCatalog=(cat)=>{SELECTED_CAT=cat;document.querySelectorAll('.cat-pill').forEach(p=>p.className="cat-pill bg-white hover:bg-slate-50 text-slate-600 font-bold text-[11px] px-3 py-1 rounded-lg border");let actP=document.getElementById('cp_'+cat.replace(/\s+/g,'_'));if(actP)actP.className="cat-pill bg-slate-900 text-white font-black text-[11px] px-3 py-1 rounded-lg";const grid=document.getElementById('gridQuickMenu');grid.innerHTML='';const allMenu=Sapna.get().menu;if(!allMenu)return;const filtered=cat==='ALL'?allMenu:allMenu.filter(m=>m.category.toLowerCase()===cat.toLowerCase());filtered.forEach(m=>{grid.innerHTML+=`<button onclick="cashierPunch('${m.id}')" class="bg-white p-2.5 rounded-xl border hover:border-emerald-500 text-left flex flex-col justify-between shadow-2xs active:scale-95 transition group"><span class="font-black text-xs text-slate-800 truncate w-full group-hover:text-emerald-700">${m.name}</span><span class="text-emerald-600 font-black text-xs block mt-1">₹${m.price}</span></button>`;});};
+        window.cashierPunch=(mId)=>{const item=Sapna.get().menu.find(x=>x.id===mId);if(item&&ACTIVE_TBL){let type=ACTIVE_TBL.id==='tbl_parcel'?'PARCEL':'DINE_IN';Sapna.punchOrder(ACTIVE_TBL.id,[item],type);}};
+        window.toggleCustomForm=()=>{const grid=document.getElementById('gridQuickMenu');const strip=document.getElementById('catPillsStrip');const form=document.getElementById('formCustomItem');const btn=document.getElementById('btnToggleCustom');if(form.classList.contains('hidden')){form.classList.remove('hidden');grid.classList.add('hidden');strip.classList.add('hidden');btn.innerText="⚡ Catalog Menu";}else{form.classList.add('hidden');grid.classList.remove('hidden');strip.classList.remove('hidden');btn.innerText="➕ Custom Item";}};
+        window.punchCustomItem=(e)=>{e.preventDefault();if(!ACTIVE_TBL)return;const name=document.getElementById('custName').value.trim();const qty=parseInt(document.getElementById('custQty').value)||1;const price=parseFloat(document.getElementById('custPrice').value)||0;const kit=document.getElementById('custKit').value;const cItems=[];for(let i=0;i<qty;i++)cItems.push({id:'c_'+Date.now()+i,name:`*Custom: ${name}`,price:price,category:'Custom',kitchenId:kit});let type=ACTIVE_TBL.id==='tbl_parcel'?'PARCEL':'DINE_IN';Sapna.punchOrder(ACTIVE_TBL.id,cItems,type);e.target.reset();toggleCustomForm();};
+
         function renderBillingList() {
-            const list = document.getElementById('listBilledItems'); const btnSettle = document.getElementById('btnSettle');
-            const db = Sapna.get(); const order = db.activeOrders.find(o => o.tableId === ACTIVE_TBL?.id);
-
-            if(!order || order.items.length === 0) {
-                list.innerHTML = `<div class="text-center py-12 text-slate-400 font-bold text-xs">Table khali hai. Niche se item punch karein 👇</div>`;
-                document.getElementById('txtSub').innerText = '₹0'; document.getElementById('txtGst').innerText = '₹0'; document.getElementById('txtGrand').innerText = '₹0';
-                document.getElementById('lblBadgeCount').innerText = '0 Items'; LIVE_GRAND_TOTAL = 0; btnSettle.disabled = true; return;
-            }
-
-            list.innerHTML = ''; let sub = 0;
-            order.items.forEach(item => {
-                sub += item.price;
-                let badge = ''; 
-                let actionBtn = `<button onclick="rmUnit('${item.uniqueTicketId}')" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-red-500 hover:text-white text-slate-400 font-black text-xs transition">✕</button>`;
-
-                if(item.status === 'PENDING') badge = `<span class="bg-blue-100 text-blue-700 border border-blue-200 px-1.5 py-0.2 rounded text-[9px] font-black uppercase">Sent</span>`;
-                else if(item.status === 'COOKING') badge = `<span class="bg-amber-100 text-amber-800 border border-amber-300 px-1.5 py-0.2 rounded text-[9px] font-black uppercase animate-pulse">👨‍🍳 Cooking</span>`;
-                else if(item.status === 'READY') {
-                    badge = `<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-1.5 py-0.2 rounded text-[9px] font-black uppercase">🥤 Ready</span>`;
-                    // HARA SERVE BUTTON INJECTED HERE!
-                    actionBtn = `<button onclick="Sapna.updateKitchenItemStatus('${order.orderId}', '${item.uniqueTicketId}', 'SERVED')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider shadow-xs active:scale-95 transition mr-1.5">🤲 Serve</button>` + actionBtn;
-                }
-                else if(item.status === 'SERVED') badge = `<span class="bg-cyan-100 text-cyan-800 border border-cyan-300 px-1.5 py-0.2 rounded text-[9px] font-black uppercase">🍽️ Served</span>`;
-
-                list.innerHTML += `
-                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs flex justify-between items-center gap-2">
-                        <div class="truncate flex-1">
-                            <h4 class="font-black text-xs text-slate-800 truncate">${item.name}</h4>
-                            <div class="flex items-center gap-2 mt-1"><span class="text-xs font-black text-emerald-700">₹${item.price}</span>${badge}</div>
-                        </div>
-                        <div class="flex items-center shrink-0">${actionBtn}</div>
-                    </div>
-                `;
-            });
-
-            const gst = Math.round(sub * 0.05); LIVE_GRAND_TOTAL = sub + gst;
-            document.getElementById('txtSub').innerText = `₹${sub}`; document.getElementById('txtGst').innerText = `₹${gst}`; document.getElementById('txtGrand').innerText = `₹${LIVE_GRAND_TOTAL}`;
-            document.getElementById('lblBadgeCount').innerText = `${order.items.length} Items`; btnSettle.disabled = false;
+            const list=document.getElementById('listBilledItems');const btnSettle=document.getElementById('btnSettle');const db=Sapna.get();const order=db.activeOrders.find(o=>o.tableId===ACTIVE_TBL?.id);
+            if(!order||order.items.length===0){list.innerHTML=`<div class="text-center py-12 text-slate-400 font-bold text-xs">Table khali hai 👇</div>`;document.getElementById('txtSub').innerText='₹0';document.getElementById('txtGst').innerText='₹0';document.getElementById('txtGrand').innerText='₹0';document.getElementById('lblBadgeCount').innerText='0 Items';LIVE_GRAND_TOTAL=0;btnSettle.disabled=true;return;}
+            list.innerHTML='';let sub=0;
+            order.items.forEach(item=>{sub+=item.price;let badge='';let actionBtn=`<button onclick="rmUnit('${item.uniqueTicketId}')" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-red-500 hover:text-white text-slate-400 font-black text-xs transition">✕</button>`;
+                if(item.status==='PENDING')badge=`<span class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-[9px] font-black uppercase">Sent</span>`;else if(item.status==='COOKING')badge=`<span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[9px] font-black uppercase animate-pulse">👨‍🍳 Cooking</span>`;else if(item.status==='READY'){badge=`<span class="bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded text-[9px] font-black uppercase">🥤 Ready</span>`;actionBtn=`<button onclick="Sapna.updateKitchenItemStatus('${order.orderId}', '${item.uniqueTicketId}', 'SERVED')" class="bg-emerald-600 text-white font-black px-2.5 py-1 rounded-lg text-[10px] uppercase mr-1.5">🤲 Serve</button>`+actionBtn;}else if(item.status==='SERVED')badge=`<span class="bg-cyan-100 text-cyan-800 px-1.5 py-0.5 rounded text-[9px] font-black uppercase">🍽️ Served</span>`;
+                list.innerHTML+=`<div class="bg-white p-3 rounded-xl border flex justify-between items-center gap-2"><div class="truncate flex-1"><h4 class="font-black text-xs text-slate-800 truncate">${item.name}</h4><div class="flex items-center gap-2 mt-1"><span class="text-xs font-black text-emerald-700">₹${item.price}</span>${badge}</div></div><div class="flex items-center shrink-0">${actionBtn}</div></div>`;});
+            let pack=parseFloat(document.getElementById('inpPacking').value)||0;let disc=parseFloat(document.getElementById('inpDiscount').value)||0;let taxable=Math.max(0,(sub+pack)-disc);const gst=Math.round(taxable*0.05);LIVE_GRAND_TOTAL=taxable+gst;
+            document.getElementById('txtSub').innerText=`₹${sub}`;document.getElementById('txtGst').innerText=`₹${gst}`;document.getElementById('txtGrand').innerText=`₹${LIVE_GRAND_TOTAL}`;document.getElementById('lblBadgeCount').innerText=`${order.items.length} Items`;btnSettle.disabled=false;
         }
 
-        // ========================================================
-        // 3. CUSTOM AD-HOC ITEM PUNCH
-        // ========================================================
-        window.toggleCustomForm = () => {
-            const grid = document.getElementById('gridQuickMenu'); const form = document.getElementById('formCustomItem'); const btn = document.getElementById('btnToggleCustom');
-            if(form.classList.contains('hidden')) { form.classList.remove('hidden'); grid.classList.add('hidden'); btn.innerText = "⚡ Catalog Menu"; btn.classList.replace('text-indigo-700','text-emerald-700'); } 
-            else { form.classList.add('hidden'); grid.classList.remove('hidden'); btn.innerText = "➕ Custom Item"; btn.classList.replace('text-emerald-700','text-indigo-700'); }
-        };
+        window.rmUnit=(tktId)=>{const db=Sapna.get();const order=db.activeOrders.find(o=>o.tableId===ACTIVE_TBL?.id);if(order){order.items=order.items.filter(i=>i.uniqueTicketId!==tktId);if(order.items.length===0)db.activeOrders=db.activeOrders.filter(o=>o.tableId!==ACTIVE_TBL.id);Sapna.save(db);}};
+        
+        window.settleCurrentKhata=()=>{const db=Sapna.get();const order=db.activeOrders.find(o=>o.tableId===ACTIVE_TBL?.id);if(order){const snap={tableName:ACTIVE_TBL.label,custName:document.getElementById('billCustName').value.trim(),custPhone:document.getElementById('billCustPhone').value.trim(),items:[...order.items],sub:document.getElementById('txtSub').innerText,pack:parseFloat(document.getElementById('inpPacking').value)||0,disc:parseFloat(document.getElementById('inpDiscount').value)||0,gst:document.getElementById('txtGst').innerText,total:LIVE_GRAND_TOTAL};Sapna.settleAndClearTable(order.orderId);document.getElementById('recTblName').innerText=snap.tableName+(snap.custName?` (${snap.custName})`:'');document.getElementById('recDate').innerText=new Date().toLocaleString();const recBox=document.getElementById('recItemsList');recBox.innerHTML='';const map={};snap.items.forEach(i=>{if(!map[i.name])map[i.name]={q:0,p:i.price};map[i.name].q++;});Object.keys(map).forEach(k=>{recBox.innerHTML+=`<div class="flex justify-between"><span>${map[k].q}x ${k}</span><span>₹${map[k].p*map[k].q}</span></div>`;});document.getElementById('recSub').innerText=snap.sub;document.getElementById('recPack').innerText=`₹${snap.pack}`;document.getElementById('recDisc').innerText=`-₹${snap.disc}`;document.getElementById('recGst').innerText=snap.gst;document.getElementById('recTotal').innerText=`₹${snap.total}`;document.getElementById('modalPaidReceipt').classList.replace('hidden','flex');document.getElementById('inpPacking').value='0';document.getElementById('inpDiscount').value='0';document.getElementById('billCustPhone').value='';document.getElementById('billCustName').value='';}};
+        window.finishSettlementModal=()=>{document.getElementById('modalPaidReceipt').classList.replace('flex','hidden');closeCounterBilling();};
 
-        window.punchCustomItem = (e) => {
-            e.preventDefault(); if(!ACTIVE_TBL) return;
-            const name = document.getElementById('custName').value.trim(); const qty = parseInt(document.getElementById('custQty').value) || 1;
-            const price = parseFloat(document.getElementById('custPrice').value) || 0; const kit = document.getElementById('custKit').value;
+        function buildThermalTicket(){const db=Sapna.get();const order=db.activeOrders.find(o=>o.tableId===ACTIVE_TBL?.id);if(!order||order.items.length===0)return;document.getElementById('prnTime').innerText=`Date: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;document.getElementById('prnTable').innerText=`Table/Khata: ${ACTIVE_TBL.label}`;const prnBox=document.getElementById('prnItems');prnBox.innerHTML='';order.items.forEach(i=>{prnBox.innerHTML+=`<div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>${i.name}</span> <span>₹${i.price}</span></div>`;});document.getElementById('prnAmt').innerText=`₹${LIVE_GRAND_TOTAL} (Inc. GST)`;}
+        window.printThermalBill=()=>{buildThermalTicket();window.print();};
 
-            const cItems = [];
-            for(let i=0; i<qty; i++) cItems.push({ id: 'c_'+Math.random().toString(36).substr(2,4), name: `*Custom: ${name}`, price: price, category: 'Custom Punch', kitchenId: kit });
+        window.openUpiModal=()=>{if(!ACTIVE_TBL||LIVE_GRAND_TOTAL<=0)return;document.getElementById('txtUpiGrandTotal').innerText=`₹${LIVE_GRAND_TOTAL}`;const upiString=`upi://pay?pa=sapnajuice@paytm&pn=Sapna%20Juice&am=${LIVE_GRAND_TOTAL}&cu=INR`;document.getElementById('imgUpiQr').src=`https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(upiString)}`;document.getElementById('modalUpi').classList.replace('hidden','flex');};window.closeUpiModal=()=>{document.getElementById('modalUpi').classList.replace('flex','hidden');};window.settleFromUpi=()=>{settleCurrentKhata();closeUpiModal();};
+        window.openZomatoIncoming=()=>{document.getElementById('modalZomatoIncoming').classList.replace('hidden','flex');};window.closeZomatoIncoming=()=>{document.getElementById('modalZomatoIncoming').classList.replace('flex','hidden');};window.acceptZomatoOrder=()=>{Sapna.punchOrder('tbl_parcel',[{id:'m_z1',name:'Zomato: Special Cocktail Juice',price:90,category:'Juices',kitchenId:'KITCHEN_BAR'},{id:'m_z2',name:'Zomato: Cheese Corn Nugget',price:60,category:'Snacks',kitchenId:'KITCHEN_FOOD'}],'PARCEL',{name:'Zomato Order #ZM-8419',phone:'Paid via UPI'});closeZomatoIncoming();selectCounterTbl('tbl_parcel','📦 TAKEAWAY PARCEL');};
 
-            let oType = ACTIVE_TBL.id === 'TBL_PARCEL' ? 'PARCEL' : 'DINE_IN';
-            Sapna.punchOrder(ACTIVE_TBL.id, cItems, oType);
-            e.target.reset(); toggleCustomForm(); // revert back to catalog
-        };
-
-        // Normal Catalog Punch
-        function renderQuickCounterMenu() {
-            const grid = document.getElementById('gridQuickMenu'); grid.innerHTML = '';
-            Sapna.get().menu.forEach(m => { grid.innerHTML += `<button onclick="cashierPunch('${m.id}')" class="bg-white p-2 rounded-xl border border-slate-200 hover:border-emerald-500 text-left font-black text-xs text-slate-800 truncate shadow-2xs active:scale-95 transition">+ ${m.name} <span class="text-emerald-600 block text-[10px]">₹${m.price}</span></button>`; });
-        }
-        window.cashierPunch = (mId) => { const item = Sapna.get().menu.find(x => x.id === mId); if(item && ACTIVE_TBL) { let type = ACTIVE_TBL.id === 'TBL_PARCEL' ? 'PARCEL' : 'DINE_IN'; Sapna.punchOrder(ACTIVE_TBL.id, [item], type); } };
-        window.rmUnit = (tktId) => { const db = Sapna.get(); const order = db.activeOrders.find(o => o.tableId === ACTIVE_TBL?.id); if(order) { order.items = order.items.filter(i => i.uniqueTicketId !== tktId); if(order.items.length === 0) db.activeOrders = db.activeOrders.filter(o => o.tableId !== ACTIVE_TBL.id); Sapna.save(db); } };
-        window.settleCurrentKhata = () => { const db = Sapna.get(); const order = db.activeOrders.find(o => o.tableId === ACTIVE_TBL?.id); if(order) { Sapna.settleAndClearTable(order.orderId); alert(`✅ Khata Settled! ₹${LIVE_GRAND_TOTAL} collected for ${ACTIVE_TBL.label}.`); selectCounterTbl(ACTIVE_TBL.id, ACTIVE_TBL.label); } };
-        window.printThermalBill = () => { window.print(); };
-
-        // ========================================================
-        // 4. DYNAMIC UPI QR MODAL GENERATOR
-        // ========================================================
-        window.openUpiModal = () => {
-            if(!ACTIVE_TBL || LIVE_GRAND_TOTAL <= 0) return;
-            document.getElementById('txtUpiGrandTotal').innerText = `₹${LIVE_GRAND_TOTAL}`;
-            
-            // Asli Standard UPI String: upi://pay?pa=UPI_ID&pn=NAME&am=AMOUNT&cu=INR
-            const upiString = `upi://pay?pa=sapnajuice@paytm&pn=Sapna%20Juice&am=${LIVE_GRAND_TOTAL}&cu=INR`;
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(upiString)}`;
-            
-            document.getElementById('imgUpiQr').src = qrUrl;
-            document.getElementById('modalUpi').classList.replace('hidden', 'flex');
-        };
-        window.closeUpiModal = () => { document.getElementById('modalUpi').classList.replace('flex', 'hidden'); };
-        window.settleFromUpi = () => { settleCurrentKhata(); closeUpiModal(); };
-
-        // Zomato Fakes
-        window.openZomatoIncoming = () => { document.getElementById('modalZomatoIncoming').classList.replace('hidden', 'flex'); };
-        window.closeZomatoIncoming = () => { document.getElementById('modalZomatoIncoming').classList.replace('flex', 'hidden'); };
-        window.acceptZomatoOrder = () => { Sapna.punchOrder('TBL_PARCEL', [{ id: 'm_z1', name: 'Zomato: Special Cocktail Juice', price: 90, category: 'Juices', kitchenId: 'KITCHEN_BAR' }, { id: 'm_z2', name: 'Zomato: Cheese Corn Nugget', price: 60, category: 'Snacks', kitchenId: 'KITCHEN_FOOD' }], 'PARCEL', { name: 'Zomato Order #ZM-8419', phone: 'Paid via UPI' }); closeZomatoIncoming(); selectCounterTbl('TBL_PARCEL', '📦 TAKEAWAY PARCEL'); };
-
-        window.addEventListener('SAPNA_STATE_UPDATED', () => { renderFloor(); if(ACTIVE_TBL) renderBillingList(); });
-        renderFloor(); updateMobileLayout();
+        window.addEventListener('SAPNA_STATE_UPDATED',()=>{renderFloor();if(ACTIVE_TBL)renderBillingList();});renderFloor();updateMobileLayout();
     </script>
 </body>
 </html>
