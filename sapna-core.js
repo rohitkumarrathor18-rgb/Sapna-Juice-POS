@@ -66,9 +66,28 @@ class SapnaCloudEngine {
     get() { return this.cache; }
 
     async save(mutatedDb) {
+        // 1. SMART GHOST DETECTOR: Jo ID pehle thi par ab nahi aayi, usey jadd se udao
+        const oldMenuIds = this.cache.menu.map(m => m.id);
+        const newMenuIds = mutatedDb.menu.map(m => m.id);
+        const deadMenu = oldMenuIds.filter(id => !newMenuIds.includes(id));
+
+        const oldCats = this.cache.categories;
+        const newCats = mutatedDb.categories;
+        const deadCats = oldCats.filter(c => !newCats.includes(c));
+
+        const oldKits = this.cache.kitchens.map(k => k.id);
+        const newKits = mutatedDb.kitchens.map(k => k.id);
+        const deadKits = oldKits.filter(id => !newKits.includes(id));
+
+        if (deadMenu.length > 0) await this.sb.from('menu').delete().in('id', deadMenu);
+        if (deadCats.length > 0) await this.sb.from('categories').delete().in('name', deadCats);
+        if (deadKits.length > 0) await this.sb.from('kitchens').delete().in('id', deadKits);
+
+        // 2. Local State Update karo
         this.cache = mutatedDb; 
         window.dispatchEvent(new CustomEvent('SAPNA_STATE_UPDATED', { detail: this.cache }));
 
+        // 3. Baaki zinda items ko normal Upsert karo
         await Promise.all([
             this.sb.from('kitchens').upsert(mutatedDb.kitchens.map(k => ({ id: k.id, name: k.name, icon: k.icon }))),
             this.sb.from('categories').upsert(mutatedDb.categories.map(c => ({ name: c }))),
@@ -76,6 +95,19 @@ class SapnaCloudEngine {
             this.sb.from('tables').upsert(mutatedDb.tables.map(t => ({ id: t.id, label: t.label, area: t.area, is_parcel: t.isParcel }))),
             this.sb.from('staff').upsert(mutatedDb.staff.map(s => ({ id: s.id, name: s.name, role: s.role, base_salary: s.baseSalary, advance_taken: s.advanceTaken, status_today: s.statusToday })))
         ]);
+    }
+
+    // NAYA WEAPON: Direct table ke input box se price badalne ke liye
+    async quickPriceUpdate(itemId, newPrice) {
+        let num = parseFloat(newPrice);
+        if(isNaN(num)) return;
+
+        let obj = this.cache.menu.find(m => m.id === itemId);
+        if(obj) {
+            obj.price = num;
+            window.dispatchEvent(new CustomEvent('SAPNA_STATE_UPDATED', { detail: this.cache }));
+            await this.sb.from('menu').update({ price: num }).eq('id', itemId);
+        }
     }
 
     async punchOrder(tableId, itemsArray, orderType = 'DINE_IN', customerInfo = { name: 'Walking Customer', phone: '' }) {
