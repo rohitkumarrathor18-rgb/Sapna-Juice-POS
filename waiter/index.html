@@ -12,7 +12,14 @@
         button, input { touch-action: manipulation; }
         ::-webkit-scrollbar { width: 4px; background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        /* Truncate multiple lines safely (VS Code Warning Fixed) */
+.line-clamp-2 { 
+    display: -webkit-box; 
+    -webkit-line-clamp: 2; 
+    line-clamp: 2; 
+    -webkit-box-orient: vertical; 
+    overflow: hidden; 
+}
     </style>
 </head>
 <body class="font-sans text-slate-800 select-none antialiased">
